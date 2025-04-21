@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { ShoppingCart, User, CloseCircle } from 'iconsax-reactjs';
+import { ShoppingCart, User } from 'iconsax-reactjs';
 
 import logo from '../../../../../public/images/logo.png';
+import CartModal from './Modal/CartModal';
 
 const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -36,8 +37,8 @@ const Header: React.FC = () => {
       {/* Header */}
       <div
         className={`
-          fixed top-0 left-0 w-full z-50 transition-all duration-300 
-          ${scrolled ? "backdrop-blur-sm bg-white/70 shadow-sm py-1" : "bg-transparent py-2"}
+          fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-white/70 backdrop-blur-sm 
+          ${scrolled ? "shadow-sm py-1" : "py-2"}
         `}
       >
         <div className='w-[80%] mx-auto flex justify-between items-center transition-all duration-300'>
@@ -55,36 +56,7 @@ const Header: React.FC = () => {
 
       {/* Sidebar Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-[60] flex font-poppins">
-          {/* Overlay */}
-          <div
-            className={`fixed inset-0 transition-opacity duration-300 ${
-              animateModal
-                ? "bg-[#D5E8FA]/30 backdrop-blur-sm"
-                : "bg-transparent backdrop-blur-0"
-            }`}
-            onClick={handleClose}
-          ></div>
-
-          {/* Sidebar */}
-          <div
-            className={`fixed right-0 top-0 h-full bg-white w-[200px] md:w-[300px] shadow-lg p-6 overflow-y-auto z-10 transform transition-transform duration-300 ease-in-out ${
-              animateModal ? "translate-x-0 opacity-100" : "translate-x-full"
-            }`}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-800">
-                Cart
-              </h2>
-              <button
-                onClick={handleClose}
-                className="text-gray-500 hover:text-gray-800"
-              >
-                <CloseCircle color="#000" size={24} />
-              </button>
-            </div>
-          </div>
-        </div>
+        <CartModal handleClose={handleClose} animateModal={animateModal}/>
       )}
     </>
   );
