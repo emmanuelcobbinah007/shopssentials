@@ -130,7 +130,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [selectedRating, setSelectedRating] = useState(0);
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   const handleCategorySelect = (categoryId: string) => {
     setActiveCategory(categoryId);

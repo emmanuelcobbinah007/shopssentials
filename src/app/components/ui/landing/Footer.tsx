@@ -73,12 +73,14 @@ const Footer: React.FC = () => {
           <p className="text-xs text-gray-400">
             © {new Date().getFullYear()} Shopssentials. All rights reserved.
           </p>
-          <Image
-            src="/images/AuroraLogo.png"
-            alt="Shopssentials"
-            width={108}
-            height={2}
-          />
+          <Link href="https://www.aurorasoftwarelabs.io/" target="_blank">
+            <Image
+              src="/images/AuroraLogo.png"
+              alt="Aurora Software Labs"
+              width={108}
+              height={2}
+            />
+          </Link>
         </div>
       </div>
     </footer>

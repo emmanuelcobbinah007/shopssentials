@@ -9,7 +9,7 @@ const SearchOverlay: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[999] transition-opacity duration-300"
+      className="fixed inset-0 bg-[#D5E8FA]/30 backdrop-blur-sm z-[999] transition-opacity duration-300"
       onClick={() => deactivateSearch()}
       aria-hidden="true"
     />

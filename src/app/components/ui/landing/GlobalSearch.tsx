@@ -25,8 +25,8 @@ const GlobalSearch: React.FC = () => {
   return (
     <>
       <SearchOverlay />
-      <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[1001] w-full max-w-2xl px-4">
-        <AnimatedSearchBar />
+      <div className="fixed top-4 left-0 right-0 z-[1001] flex justify-center px-4">
+        <AnimatedSearchBar isGlobal={true} />
       </div>
       <SearchResults />
     </>

@@ -44,7 +44,7 @@ const Hero = () => {
                   1500,
                   "Racks",
                   1500,
-                  "POS Receipt printer",
+                  "POS Receipt printers",
                   1500,
                   "Peg Boards",
                   1500,
@@ -56,7 +56,7 @@ const Hero = () => {
                   1500,
                 ]}
                 wrapper="span"
-                speed={50}
+                speed={25}
                 cursor={false}
                 repeat={Infinity}
                 className="text-[#3474c0] font-bold"

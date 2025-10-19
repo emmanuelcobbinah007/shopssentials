@@ -5,11 +5,13 @@ import { useSearch } from "../../../contexts/SearchContext";
 interface AnimatedSearchBarProps {
   onFocus?: () => void;
   onBlur?: () => void;
+  isGlobal?: boolean; // indicates if this is the global search bar
 }
 
 const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({
   onFocus,
   onBlur,
+  isGlobal = false,
 }) => {
   const {
     isSearchActive,
@@ -74,14 +76,16 @@ const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({
     ? {
         position: "fixed",
         top: 20,
-        // use measured center to avoid any lateral movement
-        left: "var(--search-center-x, 50%)",
+        // For global search, center on screen; for hero search, use measured position
+        left: isGlobal ? "50%" : "var(--search-center-x, 50%)",
         transform: "translateX(-50%)",
         zIndex: 1002,
-        width: "var(--search-width, 95%)",
-        maxWidth: "unset",
+        width: isGlobal ? "90%" : "var(--search-width, 95%)",
+        maxWidth: isGlobal ? "600px" : "unset",
         margin: 0,
-        transition: "top 320ms cubic-bezier(.2,.9,.2,1), opacity 220ms",
+        transition: isGlobal
+          ? "none"
+          : "top 320ms cubic-bezier(.2,.9,.2,1), opacity 220ms",
       }
     : {
         position: "relative",
@@ -92,7 +96,9 @@ const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({
         width: "100%",
         maxWidth: 512,
         margin: "0 auto",
-        transition: "top 420ms cubic-bezier(.2,.9,.2,1), opacity 220ms",
+        transition: isGlobal
+          ? "none"
+          : "top 420ms cubic-bezier(.2,.9,.2,1), opacity 220ms",
       };
 
   return (
