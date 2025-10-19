@@ -3,9 +3,16 @@
 import React from "react";
 import { TypeAnimation } from "react-type-animation";
 import Image from "next/image";
+import Link from "next/link";
 import HeroImage from "../../../../../public/images/Hero.jpg";
+import AnimatedSearchBar from "./AnimatedSearchBar";
+import SearchOverlay from "./SearchOverlay";
+import SearchResults from "./SearchResults";
+import { useSearch } from "../../../contexts/SearchContext";
 
 const Hero = () => {
+  const { isSearchActive } = useSearch();
+
   return (
     <div className="relative w-full h-[100vh]">
       {/* Background Image */}
@@ -60,16 +67,25 @@ const Hero = () => {
           </p>
         </div>
         <div className="relative mt-6 w-full max-w-lg">
-          <input
-            type="text"
-            placeholder="Search Shopssentials"
-            className="w-full px-6 py-3 border border-gray-300 rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
-          />
-          <button className="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 md:px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 duration-300 hover:cursor-pointer text-sm md:text-base">
-            Search
-          </button>
+          {!isSearchActive && <AnimatedSearchBar />}
         </div>
+        <Link href="/shop">
+          <button
+            className="my-4 inline-flex items-center gap-3 px-6 py-3 md:px-8 md:py-3 bg-gradient-to-r from-[#3474c0] to-[#4f8bd6] text-white rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 text-base md:text-lg font-semibold focus:outline-none focus:ring-4 focus:ring-[#3474c033] hover:cursor-pointer"
+            aria-label="Shop now"
+          >
+            <span>Shop Now</span>
+          </button>
+        </Link>
       </div>
+
+      {/* Search Overlay and Results */}
+      {!isSearchActive && (
+        <>
+          <SearchOverlay />
+          <SearchResults />
+        </>
+      )}
     </div>
   );
 };
