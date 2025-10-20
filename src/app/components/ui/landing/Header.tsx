@@ -11,8 +11,8 @@ import UserModal from "./Modal/UserModal";
 const navLinks = [
   { id: "home", label: "Home", href: "/" },
   { id: "products", label: "Products", href: "/shop" },
-  { id: "about", label: "About", href: "#about" },
-  { id: "contact", label: "Contact", href: "#contact" },
+  { id: "about", label: "About", href: "/about" },
+  { id: "contact", label: "Contact", href: "/contact" },
 ];
 
 const Header: React.FC = () => {

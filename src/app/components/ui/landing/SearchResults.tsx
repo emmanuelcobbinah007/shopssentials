@@ -2,50 +2,65 @@
 import React, { useEffect, useState } from "react";
 import { useSearch } from "../../../contexts/SearchContext";
 import Image from "next/image";
+import Link from "next/link";
 
-// Mock products data for demonstration
+// Mock products data - should match shop page data
 const mockProducts = [
   {
     id: 1,
     name: "Professional Shelving Unit",
-    price: "$299",
-    image: "/images/product1.jpg",
-    category: "Shelving",
+    price: "GHS299",
+    image: "/images/product1.jpeg",
+    category: "shelving",
   },
   {
     id: 2,
     name: "Retail Display Stand",
-    price: "$159",
+    price: "GHS159",
     image: "/images/product2.jpg",
-    category: "Displays",
+    category: "displays",
   },
   {
     id: 3,
     name: "POS System Bundle",
-    price: "$449",
+    price: "GHS449",
     image: "/images/product3.jpg",
-    category: "POS",
+    category: "pos",
   },
   {
     id: 4,
     name: "Shopping Baskets Set",
-    price: "$89",
+    price: "GHS89",
     image: "/images/product4.jpg",
-    category: "Accessories",
+    category: "accessories",
   },
   {
     id: 5,
     name: "Price Tag Gun",
-    price: "$45",
+    price: "GHS45",
     image: "/images/product1.jpg",
-    category: "Accessories",
+    category: "accessories",
   },
   {
     id: 6,
     name: "Peg Board Display",
-    price: "$120",
+    price: "GHS120",
     image: "/images/product2.jpg",
-    category: "Displays",
+    category: "displays",
+  },
+  {
+    id: 7,
+    name: "Cash Register",
+    price: "GHS199",
+    image: "/images/product3.jpg",
+    category: "pos",
+  },
+  {
+    id: 8,
+    name: "Storage Rack System",
+    price: "GHS399",
+    image: "/images/product1.jpeg",
+    category: "shelving",
   },
 ];
 
@@ -58,6 +73,7 @@ const SearchResults: React.FC = () => {
     setSearchResults,
     setIsLoading,
     setSearchQuery,
+    deactivateSearch,
   } = useSearch();
 
   // local visibility for CSS enter/exit animation
@@ -159,9 +175,11 @@ const SearchResults: React.FC = () => {
         {!isLoading && searchResults.length > 0 && (
           <div className="max-h-80 overflow-y-auto">
             {searchResults.map((product) => (
-              <div
+              <Link
                 key={product.id}
-                className="p-4 hover:bg-gray-50 border-b border-gray-50 last:border-b-0 cursor-pointer transition-colors"
+                href={`/product/${product.id}`}
+                onClick={deactivateSearch}
+                className="block p-4 hover:bg-gray-50 border-b border-gray-50 last:border-b-0 transition-colors"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 relative rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
@@ -184,7 +202,7 @@ const SearchResults: React.FC = () => {
                     {product.price}
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
