@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Sidebar from "../components/ui/landing/Sidebar";
+import { useCart } from "../contexts/CartContext";
+import { ShoppingBag, Heart } from "iconsax-reactjs";
 
 // Mock products data - in a real app, this would come from an API
 const allProducts = [
@@ -234,55 +236,86 @@ const ShopPage: React.FC = () => {
   };
 
   // Product card component
-  const ProductCard: React.FC<{ product: Product }> = ({ product }) => (
-    <Link
-      href={`/product/${product.id}`}
-      className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group block"
-    >
-      <div className="relative aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
-        />
-        {product.isOnSale && (
-          <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold">
-            SALE
+  const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
+    const { addToCart, isInCart } = useCart();
+
+    const handleAddToCart = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      addToCart(product);
+    };
+
+    return (
+      <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group">
+        <Link href={`/product/${product.id}`} className="block">
+          <div className="relative aspect-square bg-gray-100 rounded-t-lg overflow-hidden">
+            <Image
+              src={product.image}
+              alt={product.name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+            {product.isOnSale && (
+              <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold">
+                SALE
+              </div>
+            )}
+            {!product.inStock && (
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <span className="text-white font-semibold text-sm sm:text-base">
+                  Out of Stock
+                </span>
+              </div>
+            )}
           </div>
-        )}
-        {!product.inStock && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-            <span className="text-white font-semibold text-sm sm:text-base">
+          <div className="p-3 sm:p-4">
+            <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-[#3474c0] transition-colors text-sm sm:text-base">
+              {product.name}
+            </h3>
+            <div className="flex items-center gap-2 mb-2">
+              {renderStars(product.rating)}
+              <span className="text-xs text-gray-500">({product.reviews})</span>
+            </div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-lg sm:text-xl font-bold text-[#3474c0]">
+                {product.price}
+              </span>
+              {product.originalPrice && (
+                <span className="text-sm text-gray-500 line-through">
+                  {product.originalPrice}
+                </span>
+              )}
+            </div>
+            <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">
+              {product.description}
+            </p>
+          </div>
+        </Link>
+        <div className="p-3 sm:p-4 pt-0">
+          {product.inStock ? (
+            <button
+              onClick={handleAddToCart}
+              className={`w-full py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+                isInCart(product.id)
+                  ? "bg-green-500 text-white hover:bg-green-600"
+                  : "bg-[#3474c0] text-white hover:bg-[#2a5a9e]"
+              }`}
+            >
+              <ShoppingBag size={16} />
+              {isInCart(product.id) ? "Added to Cart" : "Add to Cart"}
+            </button>
+          ) : (
+            <button
+              disabled
+              className="w-full py-2 px-4 rounded-lg font-medium bg-gray-300 text-gray-500 cursor-not-allowed flex items-center justify-center gap-2"
+            >
               Out of Stock
-            </span>
-          </div>
-        )}
-      </div>
-      <div className="p-3 sm:p-4">
-        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-[#3474c0] transition-colors text-sm sm:text-base">
-          {product.name}
-        </h3>
-        <div className="flex items-center gap-2 mb-2">
-          {renderStars(product.rating)}
-          <span className="text-xs text-gray-500">({product.reviews})</span>
-        </div>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-lg sm:text-xl font-bold text-[#3474c0]">
-            {product.price}
-          </span>
-          {product.originalPrice && (
-            <span className="text-sm text-gray-500 line-through">
-              {product.originalPrice}
-            </span>
+            </button>
           )}
         </div>
-        <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">
-          {product.description}
-        </p>
       </div>
-    </Link>
-  );
+    );
+  };
 
   return (
     <div>
