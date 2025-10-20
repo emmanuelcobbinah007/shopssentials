@@ -202,13 +202,13 @@ const Header: React.FC = () => {
           {/* Mobile slide-down menu */}
           <div
             ref={mobileMenuRef}
-            className={`md:hidden fixed left-1/2 transform -translate-x-1/2 z-40 transition-all duration-500 ${
+            className={`md:hidden fixed left-1/2 transform -translate-x-1/2 z-40 transition-all duration-500 w-[80%] ${
               menuOpen
                 ? "translate-y-0 opacity-100"
                 : "-translate-y-6 opacity-0 pointer-events-none"
-            } ${scrolled ? "top-20" : "top-[64px]"}`}
+            } ${scrolled ? "top-24" : "top-[72px]"}`}
           >
-            <div className="w-full bg-white border border-gray-200/50 shadow-lg rounded-2xl overflow-hidden">
+            <div className="w-full bg-white border border-gray-200/50 shadow-lg rounded-2xl overflow-hidden mt-4">
               <div className="p-4 flex flex-col gap-2">
                 {navLinks.map((link) => (
                   <Link

@@ -1,7 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { SearchNormal1, MessageQuestion, ShoppingCart, Truck, Refresh, Shield, Headphone } from "iconsax-reactjs";
+import {
+  SearchNormal1,
+  MessageQuestion,
+  ShoppingCart,
+  Truck,
+  Refresh,
+  Shield,
+  Headphone,
+} from "iconsax-reactjs";
 
 const HelpPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -22,68 +30,80 @@ const HelpPage: React.FC = () => {
       id: 1,
       category: "orders",
       question: "How do I place an order?",
-      answer: "To place an order, browse our products, add items to your cart, and proceed to checkout. You'll need to provide shipping information and payment details. Orders are processed within 1-2 business days."
+      answer:
+        "To place an order, browse our products, add items to your cart, and proceed to checkout. You'll need to provide shipping information and payment details. Orders are processed within 1-2 business days.",
     },
     {
       id: 2,
       category: "orders",
       question: "Can I modify my order after placing it?",
-      answer: "Orders can be modified within 2 hours of placement. Please contact our customer service team immediately with your order number. Once processing begins, modifications may not be possible."
+      answer:
+        "Orders can be modified within 2 hours of placement. Please contact our customer service team immediately with your order number. Once processing begins, modifications may not be possible.",
     },
     {
       id: 3,
       category: "shipping",
       question: "What are your shipping options?",
-      answer: "We offer standard shipping (3-5 business days), express shipping (1-2 business days), and same-day delivery in Accra. Shipping costs vary based on order weight and destination."
+      answer:
+        "We offer standard shipping (3-5 business days), express shipping (1-2 business days), and same-day delivery in Accra. Shipping costs vary based on order weight and destination.",
     },
     {
       id: 4,
       category: "shipping",
       question: "Do you ship internationally?",
-      answer: "Yes, we ship to most countries in West Africa and select international destinations. International shipping typically takes 7-14 business days. Contact us for specific shipping quotes."
+      answer:
+        "Yes, we ship to most countries in West Africa and select international destinations. International shipping typically takes 7-14 business days. Contact us for specific shipping quotes.",
     },
     {
       id: 5,
       category: "returns",
       question: "What is your return policy?",
-      answer: "We accept returns within 30 days of delivery for unused items in original packaging. Return shipping costs are covered for defective items. Custom orders are not eligible for return."
+      answer:
+        "We accept returns within 30 days of delivery for unused items in original packaging. Return shipping costs are covered for defective items. Custom orders are not eligible for return.",
     },
     {
       id: 6,
       category: "returns",
       question: "How do I initiate a return?",
-      answer: "Contact our customer service team with your order number and reason for return. We'll provide a return authorization and shipping label. Returns are processed within 5-7 business days after receipt."
+      answer:
+        "Contact our customer service team with your order number and reason for return. We'll provide a return authorization and shipping label. Returns are processed within 5-7 business days after receipt.",
     },
     {
       id: 7,
       category: "account",
       question: "How do I create an account?",
-      answer: "Click the 'Sign Up' button in the top right corner and fill out the registration form. You'll receive a confirmation email to verify your account. Accounts allow you to track orders and save preferences."
+      answer:
+        "Click the 'Sign Up' button in the top right corner and fill out the registration form. You'll receive a confirmation email to verify your account. Accounts allow you to track orders and save preferences.",
     },
     {
       id: 8,
       category: "account",
       question: "How do I reset my password?",
-      answer: "Click 'Forgot Password' on the login page and enter your email address. You'll receive a password reset link. For security, reset links expire after 24 hours."
+      answer:
+        "Click 'Forgot Password' on the login page and enter your email address. You'll receive a password reset link. For security, reset links expire after 24 hours.",
     },
     {
       id: 9,
       category: "support",
       question: "How can I contact customer service?",
-      answer: "You can reach us by phone at +233 24 123 4567, email at support@shopssentials.com, or through the contact form. Our support team is available Monday-Friday, 8AM-6PM GMT."
+      answer:
+        "You can reach us by phone at +233 24 123 4567, email at support@shopssentials.com, or through the contact form. Our support team is available Monday-Friday, 8AM-6PM GMT.",
     },
     {
       id: 10,
       category: "support",
       question: "What information should I provide when contacting support?",
-      answer: "Please include your order number, contact information, and a detailed description of your issue. Screenshots or photos are helpful for technical problems. This helps us resolve your issue faster."
-    }
+      answer:
+        "Please include your order number, contact information, and a detailed description of your issue. Screenshots or photos are helpful for technical problems. This helps us resolve your issue faster.",
+    },
   ];
 
-  const filteredFAQs = faqs.filter(faq => {
-    const matchesSearch = faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         faq.answer.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = activeCategory === "all" || faq.category === activeCategory;
+  const filteredFAQs = faqs.filter((faq) => {
+    const matchesSearch =
+      faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      faq.answer.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      activeCategory === "all" || faq.category === activeCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -94,16 +114,15 @@ const HelpPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Spacer */}
-      <div className="h-16"></div>
+      <div className="h-24"></div>
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-[#3474c0] to-[#4f8bd6] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            Help Center
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Help Center</h1>
           <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
-            Find answers to common questions or get in touch with our support team
+            Find answers to common questions or get in touch with our support
+            team
           </p>
         </div>
       </section>
@@ -156,12 +175,17 @@ const HelpPage: React.FC = () => {
             {filteredFAQs.length > 0 ? (
               <div className="space-y-4">
                 {filteredFAQs.map((faq) => (
-                  <div key={faq.id} className="bg-white rounded-lg shadow-sm border border-gray-200">
+                  <div
+                    key={faq.id}
+                    className="bg-white rounded-lg shadow-sm border border-gray-200"
+                  >
                     <button
                       onClick={() => toggleFAQ(faq.id)}
                       className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
                     >
-                      <span className="font-semibold text-gray-900">{faq.question}</span>
+                      <span className="font-semibold text-gray-900">
+                        {faq.question}
+                      </span>
                       <svg
                         className={`w-5 h-5 text-gray-500 transform transition-transform ${
                           expandedFAQ === faq.id ? "rotate-180" : ""
@@ -170,12 +194,19 @@ const HelpPage: React.FC = () => {
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
                       </svg>
                     </button>
                     {expandedFAQ === faq.id && (
                       <div className="px-6 pb-4">
-                        <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+                        <p className="text-gray-600 leading-relaxed">
+                          {faq.answer}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -183,10 +214,17 @@ const HelpPage: React.FC = () => {
               </div>
             ) : (
               <div className="text-center py-12">
-                <MessageQuestion size={48} color="#9CA3AF" className="mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No results found</h3>
+                <MessageQuestion
+                  size={48}
+                  color="#9CA3AF"
+                  className="mx-auto mb-4"
+                />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  No results found
+                </h3>
                 <p className="text-gray-600 mb-4">
-                  Try adjusting your search terms or browse our categories above.
+                  Try adjusting your search terms or browse our categories
+                  above.
                 </p>
                 <button
                   onClick={() => {
@@ -215,9 +253,12 @@ const HelpPage: React.FC = () => {
               <div className="w-12 h-12 bg-[#3474c0] rounded-full flex items-center justify-center mb-4">
                 <ShoppingCart size={24} color="white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Getting Started</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                Getting Started
+              </h3>
               <p className="text-gray-600 mb-4">
-                Learn how to browse products, create an account, and place your first order.
+                Learn how to browse products, create an account, and place your
+                first order.
               </p>
               <button className="text-[#3474c0] font-semibold hover:text-[#4f8bd6] transition-colors">
                 Learn More →
@@ -228,9 +269,12 @@ const HelpPage: React.FC = () => {
               <div className="w-12 h-12 bg-[#3474c0] rounded-full flex items-center justify-center mb-4">
                 <Truck size={24} color="white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Shipping & Delivery</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                Shipping & Delivery
+              </h3>
               <p className="text-gray-600 mb-4">
-                Understand our shipping options, delivery times, and tracking information.
+                Understand our shipping options, delivery times, and tracking
+                information.
               </p>
               <button className="text-[#3474c0] font-semibold hover:text-[#4f8bd6] transition-colors">
                 Learn More →
@@ -241,9 +285,12 @@ const HelpPage: React.FC = () => {
               <div className="w-12 h-12 bg-[#3474c0] rounded-full flex items-center justify-center mb-4">
                 <Refresh size={24} color="white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">Returns & Exchanges</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                Returns & Exchanges
+              </h3>
               <p className="text-gray-600 mb-4">
-                Find out about our return policy, how to initiate returns, and exchange options.
+                Find out about our return policy, how to initiate returns, and
+                exchange options.
               </p>
               <button className="text-[#3474c0] font-semibold hover:text-[#4f8bd6] transition-colors">
                 Learn More →
@@ -260,7 +307,8 @@ const HelpPage: React.FC = () => {
             Still Need Help?
           </h2>
           <p className="text-xl text-gray-600 mb-8">
-            Our customer support team is here to assist you with any questions or concerns.
+            Our customer support team is here to assist you with any questions
+            or concerns.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -268,7 +316,9 @@ const HelpPage: React.FC = () => {
               <div className="w-12 h-12 bg-[#3474c0] rounded-full flex items-center justify-center mx-auto mb-4">
                 <Headphone size={24} color="white" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Phone Support</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">
+                Phone Support
+              </h3>
               <p className="text-gray-600 text-sm mb-3">Mon-Fri, 8AM-6PM GMT</p>
               <p className="font-semibold text-[#3474c0]">+233 24 123 4567</p>
             </div>
@@ -277,9 +327,15 @@ const HelpPage: React.FC = () => {
               <div className="w-12 h-12 bg-[#3474c0] rounded-full flex items-center justify-center mx-auto mb-4">
                 <MessageQuestion size={24} color="white" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Email Support</h3>
-              <p className="text-gray-600 text-sm mb-3">Response within 24 hours</p>
-              <p className="font-semibold text-[#3474c0]">support@shopssentials.com</p>
+              <h3 className="font-semibold text-gray-900 mb-2">
+                Email Support
+              </h3>
+              <p className="text-gray-600 text-sm mb-3">
+                Response within 24 hours
+              </p>
+              <p className="font-semibold text-[#3474c0]">
+                support@shopssentials.com
+              </p>
             </div>
 
             <div className="bg-white rounded-lg shadow-sm p-6">
@@ -295,9 +351,12 @@ const HelpPage: React.FC = () => {
           </div>
 
           <div className="bg-[#3474c0] text-white rounded-lg p-8">
-            <h3 className="text-2xl font-bold mb-4">Contact Our Support Team</h3>
+            <h3 className="text-2xl font-bold mb-4">
+              Contact Our Support Team
+            </h3>
             <p className="text-blue-100 mb-6">
-              For urgent issues or complex inquiries, our dedicated support team is ready to help.
+              For urgent issues or complex inquiries, our dedicated support team
+              is ready to help.
             </p>
             <a
               href="/contact"

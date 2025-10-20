@@ -295,7 +295,7 @@ const ShopPage: React.FC = () => {
           {product.inStock ? (
             <button
               onClick={handleAddToCart}
-              className={`w-full py-2 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+              className={`w-full py-2 px-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
                 isInCart(product.id)
                   ? "bg-green-500 text-white hover:bg-green-600"
                   : "bg-[#3474c0] text-white hover:bg-[#2a5a9e]"
@@ -319,7 +319,7 @@ const ShopPage: React.FC = () => {
 
   return (
     <div>
-      <div className="h-16"></div>
+      <div className="h-24"></div>
       <main className="flex min-h-screen bg-gray-50">
         {/* Desktop Sidebar */}
         <div className="hidden lg:block">

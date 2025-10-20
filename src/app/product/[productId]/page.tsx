@@ -120,7 +120,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
 
   return (
     <div>
-      <div className="h-18"></div>
+      <div className="h-24"></div>
       <div className="min-h-screen bg-gray-50">
         {/* Breadcrumb */}
         <div className="bg-white border-b border-gray-200">

@@ -99,7 +99,7 @@ const CartModal: React.FC<CartModalProps> = ({ handleClose, animateModal }) => {
 
       {/* Sidebar */}
       <div
-        className={`fixed right-0 top-0 h-full bg-white w-[250px] md:w-[400px] shadow-lg p-6 overflow-y-auto z-10 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed right-0 top-0 h-full bg-white w-[350px] md:w-[400px] shadow-lg p-6 overflow-y-auto z-10 transform transition-transform duration-300 ease-in-out ${
           animateModal ? "translate-x-0 opacity-100" : "translate-x-full"
         }`}
       >
