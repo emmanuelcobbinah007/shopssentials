@@ -94,7 +94,7 @@ const Header: React.FC = () => {
             className={`flex items-center justify-between px-6 py-3 transition-all duration-300 ${
               scrolled
                 ? "bg-white/80 backdrop-blur-lg rounded-full shadow-lg border border-gray-200"
-                : "bg-transparent"
+                : "bg-white/20 backdrop-blur-xs shadow-sm rounded-full"
             }`}
           >
             {/* Logo */}

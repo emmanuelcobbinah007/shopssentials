@@ -56,7 +56,7 @@ const ContactPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Spacer */}
-      <div className="h-16"></div>
+      <div className="h-24"></div>
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-[#3474c0] to-[#4f8bd6] text-white py-16">
