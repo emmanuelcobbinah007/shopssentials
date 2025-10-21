@@ -9,7 +9,7 @@ interface Product {
   category: string;
 }
 
-interface CartItem {
+export interface CartItem {
   product: Product;
   quantity: number;
 }

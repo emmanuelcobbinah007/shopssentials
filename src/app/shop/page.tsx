@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Sidebar from "../components/ui/landing/Sidebar";
 import { useCart } from "../contexts/CartContext";
-import { ShoppingBag, Heart } from "iconsax-reactjs";
+import { ShoppingBag } from "iconsax-reactjs";
 
 // Mock products data - in a real app, this would come from an API
 const allProducts = [
@@ -123,14 +123,7 @@ interface Product {
   isOnSale: boolean;
 }
 
-interface Filters {
-  category: string;
-  priceRange: [number, number];
-  inStockOnly: boolean;
-}
-
 const ShopPage: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>(allProducts);
   const [filteredProducts, setFilteredProducts] =
     useState<Product[]>(allProducts);
   const [sortBy, setSortBy] = useState<string>("name");

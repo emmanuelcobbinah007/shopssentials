@@ -84,14 +84,15 @@ const products = [
 ];
 
 interface ProductPageProps {
-  params: {
+  params: Promise<{
     productId: string;
-  };
+  }>;
 }
 
-const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
-  const productId = parseInt(params.productId);
-  const product = products.find((p) => p.id === productId);
+const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
+  const { productId } = await params;
+  const productIdNum = parseInt(productId);
+  const product = products.find((p) => p.id === productIdNum);
 
   if (!product) {
     notFound();

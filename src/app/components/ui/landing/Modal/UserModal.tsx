@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { CloseCircle, ArrowLeft } from "iconsax-reactjs";
 import SignInForm from "./SignInForm";
 import SignUpForm from "./SignUpForm";

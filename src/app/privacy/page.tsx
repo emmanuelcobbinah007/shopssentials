@@ -317,7 +317,7 @@ const PrivacyPage: React.FC = () => {
           <ul className="list-disc list-inside text-gray-600 space-y-1">
             <li>Email notification to registered users</li>
             <li>Prominent notice on our website</li>
-            <li>Update of the "Last Updated" date below</li>
+            <li>Update of the &quot;Last Updated&quot; date below</li>
           </ul>
           <p className="text-gray-600 leading-relaxed">
             Your continued use of our services after any changes indicates your

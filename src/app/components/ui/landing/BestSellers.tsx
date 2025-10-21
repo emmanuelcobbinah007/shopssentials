@@ -104,7 +104,7 @@ const BestSellers: React.FC = () => {
         >
           {/* Left Column */}
           <motion.div variants={leftColumnVariants} className="space-y-6">
-            {leftProducts.map((product, index) => (
+            {leftProducts.map((product) => (
               <Link
                 key={product.id}
                 href={`/product/${product.id}`}
@@ -146,7 +146,7 @@ const BestSellers: React.FC = () => {
             variants={rightColumnVariants}
             className="space-y-6 lg:mt-16"
           >
-            {rightProducts.map((product, index) => (
+            {rightProducts.map((product) => (
               <Link
                 key={product.id}
                 href={`/product/${product.id}`}

@@ -1,6 +1,7 @@
 import React from "react";
+import Image from "next/image";
 import { CloseCircle, Add, Minus, Trash } from "iconsax-reactjs";
-import { useCart } from "@/app/contexts/CartContext";
+import { useCart, CartItem } from "@/app/contexts/CartContext";
 
 interface CartModalProps {
   handleClose: () => void;
@@ -44,11 +45,13 @@ const CartModal: React.FC<CartModalProps> = ({ handleClose, animateModal }) => {
     </div>
   );
 
-  const CartItem = ({ item }: { item: any }) => (
+  const CartItem = ({ item }: { item: CartItem }) => (
     <div className="flex items-center gap-3 py-4 border-b border-gray-100 last:border-b-0">
-      <img
+      <Image
         src={item.product.image}
         alt={item.product.name}
+        width={48}
+        height={48}
         className="w-12 h-12 object-cover rounded-lg"
       />
       <div className="flex-1 min-w-0">

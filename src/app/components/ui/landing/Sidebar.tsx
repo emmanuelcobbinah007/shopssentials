@@ -1,9 +1,15 @@
 "use client";
 import React, { useState } from "react";
 
+interface Filters {
+  priceRange: [number, number];
+  rating: number;
+  inStockOnly: boolean;
+}
+
 interface SidebarProps {
   onCategoryChange?: (category: string) => void;
-  onFiltersChange?: (filters: any) => void;
+  onFiltersChange?: (filters: Filters) => void;
 }
 
 const categories = [
@@ -127,7 +133,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onFiltersChange,
 }) => {
   const [activeCategory, setActiveCategory] = useState("all");
-  const [priceRange, setPriceRange] = useState([0, 1000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
   const [selectedRating, setSelectedRating] = useState(0);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
@@ -148,25 +154,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       rating: 0,
       inStockOnly: false,
     });
-  };
-
-  const renderStars = (rating: number, onClick?: (rating: number) => void) => {
-    return (
-      <div className="flex gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            onClick={() => onClick?.(star)}
-            className={`text-lg ${
-              star <= rating ? "text-yellow-400" : "text-gray-300"
-            } ${onClick ? "hover:text-yellow-300 cursor-pointer" : ""}`}
-            disabled={!onClick}
-          >
-            ★
-          </button>
-        ))}
-      </div>
-    );
   };
 
   return (
@@ -266,7 +253,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                   step="10"
                   value={priceRange[1]}
                   onChange={(e) => {
-                    const newRange = [priceRange[0], parseInt(e.target.value)];
+                    const newRange: [number, number] = [
+                      priceRange[0],
+                      parseInt(e.target.value),
+                    ];
                     setPriceRange(newRange);
                     onFiltersChange?.({
                       priceRange: newRange,
@@ -291,7 +281,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   max="1000"
                   value={priceRange[0]}
                   onChange={(e) => {
-                    const newRange = [
+                    const newRange: [number, number] = [
                       parseInt(e.target.value) || 0,
                       priceRange[1],
                     ];
@@ -306,7 +296,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   max="1000"
                   value={priceRange[1]}
                   onChange={(e) => {
-                    const newRange = [
+                    const newRange: [number, number] = [
                       priceRange[0],
                       parseInt(e.target.value) || 1000,
                     ];

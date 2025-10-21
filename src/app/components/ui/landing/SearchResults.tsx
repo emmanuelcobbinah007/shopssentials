@@ -72,7 +72,6 @@ const SearchResults: React.FC = () => {
     isLoading,
     setSearchResults,
     setIsLoading,
-    setSearchQuery,
     deactivateSearch,
   } = useSearch();
 
@@ -163,7 +162,7 @@ const SearchResults: React.FC = () => {
         {!isLoading && searchQuery && searchResults.length === 0 && (
           <div className="p-8 text-center">
             <p className="text-gray-500">
-              No products found for "{searchQuery}"
+              No products found for &quot;{searchQuery}&quot;
             </p>
             <p className="text-sm text-gray-400 mt-1">
               Try different keywords or browse our categories

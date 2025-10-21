@@ -337,8 +337,8 @@ const AboutPage: React.FC = () => {
                 Customer First
               </h3>
               <p className="text-gray-600">
-                Your satisfaction and success drive everything we do. We're here
-                to support your business growth.
+                Your satisfaction and success drive everything we do. We&apos;re
+                here to support your business growth.
               </p>
             </div>
           </div>
@@ -352,7 +352,7 @@ const AboutPage: React.FC = () => {
             Ready to Transform Your Retail Space?
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Let's discuss how we can help you create the perfect retail
+            Let&apos;s discuss how we can help you create the perfect retail
             environment for your business.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
