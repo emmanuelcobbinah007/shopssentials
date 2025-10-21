@@ -65,7 +65,7 @@ const AboutPage: React.FC = () => {
           </h1>
           <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
             Your trusted partner in retail excellence. We provide quality
-            equipment and supplies to help your business thrive in today's
+            equipment and supplies to help your business thrive in today&apos;s
             competitive market.
           </p>
         </div>
@@ -105,17 +105,17 @@ const AboutPage: React.FC = () => {
                 </p>
                 <p>
                   What started as a small operation in Accra has grown into
-                  Ghana's leading provider of retail solutions. We've helped
-                  hundreds of businesses - from corner stores to large
+                  Ghana&apos;s leading provider of retail solutions. We&apos;ve
+                  helped hundreds of businesses - from corner stores to large
                   supermarkets - optimize their operations and improve customer
                   experiences.
                 </p>
                 <p>
                   Today, we continue to expand our product range and services,
                   always maintaining our commitment to quality, reliability, and
-                  exceptional customer service. Our "No. 1 Shop Plug" reputation
-                  is built on trust, expertise, and genuine care for our
-                  customers' success.
+                  exceptional customer service. Our &quot;No. 1 Shop Plug&quot;
+                  reputation is built on trust, expertise, and genuine care for
+                  our customers&apos; success.
                 </p>
               </div>
             </div>
