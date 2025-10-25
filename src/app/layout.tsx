@@ -7,6 +7,8 @@ import "./globals.css";
 import { Poppins } from "next/font/google";
 import FixedSearchButton from "./components/ui/landing/FixedSearchButton";
 import GlobalSearch from "./components/ui/landing/GlobalSearch";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -35,6 +37,18 @@ export default function RootLayout({
             <FixedSearchButton />
             <GlobalSearch />
           </SearchProvider>
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
         </CartProvider>
       </body>
     </html>

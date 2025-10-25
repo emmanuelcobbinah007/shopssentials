@@ -158,7 +158,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div
-      className={`bg-white border-r border-gray-200 h-screen overflow-y-auto sidebar-scroll transition-all duration-300 ${
+      className={`bg-white border-r border-gray-200 h-screen overflow-y-auto sidebar-scroll transition-all duration-300 sticky top-0 ${
         isCollapsed ? "w-16" : "w-80"
       }`}
     >

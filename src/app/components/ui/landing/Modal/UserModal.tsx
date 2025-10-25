@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { CloseCircle, ArrowLeft } from "iconsax-reactjs";
+import axios from "axios";
+import { toast } from "react-toastify";
 import SignInForm from "./SignInForm";
 import SignUpForm from "./SignUpForm";
 import UserProfile from "./UserProfile";
@@ -22,14 +24,23 @@ const UserModal: React.FC<UserModalProps> = ({ handleClose, animateModal }) => {
     // Handle sign in logic here
   };
 
-  const handleSignupSubmit = (data: {
+  const handleSignupSubmit = async (data: {
     name: string;
     email: string;
     password: string;
     confirmPassword: string;
   }) => {
-    console.log("Sign up:", data);
-    // Handle sign up logic here
+    try {
+      const response = await axios.post("/api/auth/signup", data);
+
+      toast.success("Account created successfully! Please sign in.");
+      changeState("signin");
+    } catch (error: any) {
+      console.error("Sign up error:", error);
+      const errorMessage =
+        error.response?.data?.error || "An error occurred during sign up.";
+      toast.error(errorMessage);
+    }
   };
 
   const handleForgotSubmit = (data: { email: string }) => {
