@@ -1,116 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Sidebar from "../components/ui/landing/Sidebar";
 import { useCart } from "../contexts/CartContext";
 import { ShoppingBag } from "iconsax-reactjs";
-
-// Mock products data - in a real app, this would come from an API
-const allProducts = [
-  {
-    id: 1,
-    name: "Professional Shelving Unit",
-    price: "GHS299",
-    originalPrice: "GHS349",
-    image: "/images/product1.jpeg",
-    description: "Heavy-duty steel shelving for maximum storage capacity",
-    category: "shelving",
-    rating: 4.5,
-    reviews: 23,
-    inStock: true,
-    isOnSale: true,
-  },
-  {
-    id: 2,
-    name: "Retail Display Stand",
-    price: "GHS159",
-    image: "/images/product2.jpg",
-    description: "Eye-catching display stand to showcase your best products",
-    category: "displays",
-    rating: 4.2,
-    reviews: 15,
-    inStock: true,
-    isOnSale: false,
-  },
-  {
-    id: 3,
-    name: "POS System Bundle",
-    price: "GHS449",
-    image: "/images/product3.jpg",
-    description: "Complete point-of-sale system with receipt printer",
-    category: "pos",
-    rating: 4.8,
-    reviews: 31,
-    inStock: false,
-    isOnSale: false,
-  },
-  {
-    id: 4,
-    name: "Shopping Baskets Set",
-    price: "GHS89",
-    image: "/images/product4.jpg",
-    description: "Durable plastic baskets for customer convenience",
-    category: "accessories",
-    rating: 4.0,
-    reviews: 8,
-    inStock: true,
-    isOnSale: false,
-  },
-  {
-    id: 5,
-    name: "Price Tag Gun",
-    price: "GHS45",
-    originalPrice: "GHS55",
-    image: "/images/product1.jpg",
-    description: "Professional price tag gun for retail labeling",
-    category: "accessories",
-    rating: 4.3,
-    reviews: 12,
-    inStock: true,
-    isOnSale: true,
-  },
-  {
-    id: 6,
-    name: "Peg Board Display",
-    price: "GHS120",
-    image: "/images/product2.jpg",
-    description: "Customizable peg board display system",
-    category: "displays",
-    rating: 4.1,
-    reviews: 9,
-    inStock: true,
-    isOnSale: false,
-  },
-  {
-    id: 7,
-    name: "Cash Register",
-    price: "GHS199",
-    image: "/images/product3.jpg",
-    description: "Electronic cash register with thermal printer",
-    category: "pos",
-    rating: 4.6,
-    reviews: 18,
-    inStock: true,
-    isOnSale: false,
-  },
-  {
-    id: 8,
-    name: "Storage Rack System",
-    price: "GHS399",
-    image: "/images/product1.jpeg",
-    description: "Industrial storage rack system for warehouses",
-    category: "shelving",
-    rating: 4.7,
-    reviews: 27,
-    inStock: true,
-    isOnSale: false,
-  },
-];
+import axios from "axios";
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   price: string;
   originalPrice?: string;
@@ -121,25 +20,70 @@ interface Product {
   reviews: number;
   inStock: boolean;
   isOnSale: boolean;
+  categoryId: string;
+  subCategoryId?: string;
 }
 
 const ShopPage: React.FC = () => {
-  const [filteredProducts, setFilteredProducts] =
-    useState<Product[]>(allProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<string>("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [currentFilters, setCurrentFilters] = useState({
+    categoryId: "all",
+    subCategoryId: "all",
+    minPrice: 0,
+    maxPrice: 10000,
+    inStock: false,
+    search: "",
+  });
+
+  // Fetch products from API
+  const fetchProducts = async (filters = currentFilters, sort = sortBy) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const params = new URLSearchParams();
+      if (filters.categoryId !== "all")
+        params.append("categoryId", filters.categoryId);
+      if (filters.subCategoryId !== "all")
+        params.append("subCategoryId", filters.subCategoryId);
+      if (filters.minPrice > 0)
+        params.append("minPrice", filters.minPrice.toString());
+      if (filters.maxPrice < 10000)
+        params.append("maxPrice", filters.maxPrice.toString());
+      if (filters.inStock) params.append("inStock", "true");
+      if (filters.search) params.append("search", filters.search);
+      params.append("sortBy", sort);
+
+      const response = await axios.get(`/api/products?${params}`);
+      const fetchedProducts = response.data.products;
+
+      setProducts(fetchedProducts);
+      setFilteredProducts(fetchedProducts);
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      setError("Failed to load products. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   // Handle category filtering
-  const handleCategoryChange = (category: string) => {
-    let filtered = allProducts;
-
-    if (category !== "all") {
-      filtered = filtered.filter((product) => product.category === category);
-    }
-
-    setFilteredProducts(filtered);
-    setIsSidebarOpen(false); // Close sidebar on mobile after selection
+  const handleCategoryChange = (categoryId: string) => {
+    const newFilters = { ...currentFilters, categoryId };
+    setCurrentFilters(newFilters);
+    fetchProducts(newFilters, sortBy);
+    setIsSidebarOpen(false);
   };
 
   // Handle other filters
@@ -148,66 +92,21 @@ const ShopPage: React.FC = () => {
     rating: number;
     inStockOnly: boolean;
   }) => {
-    let filtered = allProducts;
-
-    // Category filter (maintain current category selection)
-    const currentCategory =
-      filteredProducts.length < allProducts.length
-        ? filteredProducts[0]?.category || "all"
-        : "all";
-
-    if (currentCategory !== "all") {
-      filtered = filtered.filter(
-        (product) => product.category === currentCategory
-      );
-    }
-
-    // Price range filter
-    filtered = filtered.filter((product) => {
-      const price = parseInt(product.price.replace("GHS", ""));
-      return price >= filters.priceRange[0] && price <= filters.priceRange[1];
-    });
-
-    // Stock filter
-    if (filters.inStockOnly) {
-      filtered = filtered.filter((product) => product.inStock);
-    }
-
-    // Rating filter (if implemented)
-    if (filters.rating > 0) {
-      filtered = filtered.filter((product) => product.rating >= filters.rating);
-    }
-
-    setFilteredProducts(filtered);
-    setIsSidebarOpen(false); // Close sidebar on mobile after applying filters
+    const newFilters = {
+      ...currentFilters,
+      minPrice: filters.priceRange[0],
+      maxPrice: filters.priceRange[1],
+      inStock: filters.inStockOnly,
+    };
+    setCurrentFilters(newFilters);
+    fetchProducts(newFilters, sortBy);
+    setIsSidebarOpen(false);
   };
 
   // Handle sorting
   const handleSort = (sortOption: string) => {
     setSortBy(sortOption);
-    const sorted = [...filteredProducts].sort((a, b) => {
-      switch (sortOption) {
-        case "name":
-          return a.name.localeCompare(b.name);
-        case "price-low":
-          return (
-            parseInt(a.price.replace("GHS", "")) -
-            parseInt(b.price.replace("GHS", ""))
-          );
-        case "price-high":
-          return (
-            parseInt(b.price.replace("GHS", "")) -
-            parseInt(a.price.replace("GHS", ""))
-          );
-        case "rating":
-          return b.rating - a.rating;
-        case "newest":
-          return b.id - a.id; // Assuming higher ID = newer
-        default:
-          return 0;
-      }
-    });
-    setFilteredProducts(sorted);
+    fetchProducts(currentFilters, sortOption);
   };
 
   // Render star rating
@@ -235,7 +134,15 @@ const ShopPage: React.FC = () => {
     const handleAddToCart = (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      addToCart(product);
+      // Convert product to match CartContext Product interface
+      const cartProduct = {
+        id: parseInt(product.id),
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        category: product.category,
+      };
+      addToCart(cartProduct);
     };
 
     return (
@@ -289,13 +196,13 @@ const ShopPage: React.FC = () => {
             <button
               onClick={handleAddToCart}
               className={`w-full py-2 px-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
-                isInCart(product.id)
+                isInCart(parseInt(product.id))
                   ? "bg-green-500 text-white hover:bg-green-600"
                   : "bg-[#3474c0] text-white hover:bg-[#2a5a9e]"
               }`}
             >
               <ShoppingBag size={16} />
-              {isInCart(product.id) ? "Added to Cart" : "Add to Cart"}
+              {isInCart(parseInt(product.id)) ? "Added to Cart" : "Add to Cart"}
             </button>
           ) : (
             <button
@@ -474,8 +381,16 @@ const ShopPage: React.FC = () => {
                 </p>
                 <button
                   onClick={() => {
-                    setFilteredProducts(allProducts);
-                    handleCategoryChange("all");
+                    const resetFilters = {
+                      categoryId: "all",
+                      subCategoryId: "all",
+                      minPrice: 0,
+                      maxPrice: 10000,
+                      inStock: false,
+                      search: "",
+                    };
+                    setCurrentFilters(resetFilters);
+                    fetchProducts(resetFilters, sortBy);
                   }}
                   className="bg-[#3474c0] text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-[#4f8bd6] transition-colors text-sm sm:text-base"
                 >

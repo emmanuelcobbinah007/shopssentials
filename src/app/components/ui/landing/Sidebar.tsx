@@ -1,5 +1,16 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+
+interface Category {
+  id: string;
+  name: string;
+  count: number;
+  subCategories?: Array<{
+    id: string;
+    name: string;
+  }>;
+}
 
 interface Filters {
   priceRange: [number, number];
@@ -12,122 +23,6 @@ interface SidebarProps {
   onFiltersChange?: (filters: Filters) => void;
 }
 
-const categories = [
-  {
-    id: "all",
-    name: "All Products",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.5}
-        aria-hidden
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M3 7h18l-1.5 9a2 2 0 01-2 1.5H6.5A2 2 0 014.5 16L3 7z"
-        />
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M16 3a2 2 0 11-4 0"
-        />
-      </svg>
-    ),
-    count: 124,
-  },
-  {
-    id: "shelving",
-    name: "Shelving",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.5}
-        aria-hidden
-      >
-        <rect x="3" y="3" width="18" height="6" rx="1" />
-        <rect x="3" y="15" width="18" height="6" rx="1" />
-      </svg>
-    ),
-    count: 45,
-  },
-  {
-    id: "displays",
-    name: "Displays",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.5}
-        aria-hidden
-      >
-        <rect x="3" y="4" width="18" height="12" rx="1" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8 20h8" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v4" />
-      </svg>
-    ),
-    count: 28,
-  },
-  {
-    id: "pos",
-    name: "POS Systems",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.5}
-        aria-hidden
-      >
-        <rect x="2" y="5" width="20" height="14" rx="2" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2 10h20" />
-      </svg>
-    ),
-    count: 12,
-  },
-  {
-    id: "accessories",
-    name: "Accessories",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-5 w-5"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.5}
-        aria-hidden
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M21 11.5V6a2 2 0 00-2-2h-5.5"
-        />
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M3 7.5V18a2 2 0 002 2h11"
-        />
-        <circle cx="12" cy="11.5" r="2" />
-      </svg>
-    ),
-    count: 39,
-  },
-];
-
 const Sidebar: React.FC<SidebarProps> = ({
   onCategoryChange,
   onFiltersChange,
@@ -137,10 +32,129 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [selectedRating, setSelectedRating] = useState(0);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState<string | null>(null);
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        setCategoriesError(null);
+        const response = await axios.get("/api/categories");
+        setCategories(response.data.categories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        setCategoriesError("Failed to load categories");
+      } finally {
+        setCategoriesLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleCategorySelect = (categoryId: string) => {
     setActiveCategory(categoryId);
     onCategoryChange?.(categoryId);
+  };
+
+  // Function to get icon based on category name
+  const getCategoryIcon = (categoryName: string) => {
+    const iconMap: { [key: string]: React.JSX.Element } = {
+      shelving: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.5}
+          aria-hidden
+        >
+          <rect x="3" y="3" width="18" height="6" rx="1" />
+          <rect x="3" y="15" width="18" height="6" rx="1" />
+        </svg>
+      ),
+      displays: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.5}
+          aria-hidden
+        >
+          <rect x="3" y="4" width="18" height="12" rx="1" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8 20h8" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v4" />
+        </svg>
+      ),
+      pos: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.5}
+          aria-hidden
+        >
+          <rect x="2" y="5" width="20" height="14" rx="2" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M2 10h20" />
+        </svg>
+      ),
+      accessories: (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.5}
+          aria-hidden
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M21 11.5V6a2 2 0 00-2-2h-5.5"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M3 7.5V18a2 2 0 002 2h11"
+          />
+          <circle cx="12" cy="11.5" r="2" />
+        </svg>
+      ),
+    };
+
+    return (
+      iconMap[categoryName.toLowerCase()] || (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.5}
+          aria-hidden
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M3 7h18l-1.5 9a2 2 0 01-2 1.5H6.5A2 2 0 014.5 16L3 7z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M16 3a2 2 0 11-4 0"
+          />
+        </svg>
+      )
+    );
   };
 
   const clearAllFilters = () => {
@@ -200,36 +214,114 @@ const Sidebar: React.FC<SidebarProps> = ({
             isCollapsed ? "flex flex-col items-center" : ""
           }`}
         >
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => handleCategorySelect(category.id)}
-              className={`flex items-center justify-center p-3 rounded-lg transition-colors ${
-                activeCategory === category.id
-                  ? "bg-[#3474c0] text-white"
-                  : "hover:bg-gray-50 text-gray-700"
-              } ${isCollapsed ? "w-10 h-10" : "w-full justify-between"}`}
-              title={isCollapsed ? category.name : undefined}
-            >
-              <span className="text-lg">{category.icon}</span>
-              {!isCollapsed && (
-                <>
-                  <span className="font-medium flex-1 text-left ml-3">
-                    {category.name}
-                  </span>
-                  <span
-                    className={`text-sm px-2 py-1 rounded-full ${
-                      activeCategory === category.id
-                        ? "bg-white/20 text-white"
-                        : "bg-gray-100 text-gray-500"
-                    }`}
-                  >
-                    {category.count}
-                  </span>
-                </>
-              )}
-            </button>
-          ))}
+          {/* All Products option */}
+          <button
+            onClick={() => handleCategorySelect("all")}
+            className={`flex items-center justify-center p-3 rounded-lg transition-colors ${
+              activeCategory === "all"
+                ? "bg-[#3474c0] text-white"
+                : "hover:bg-gray-50 text-gray-700"
+            } ${isCollapsed ? "w-10 h-10" : "w-full justify-between"}`}
+            title={isCollapsed ? "All Products" : undefined}
+          >
+            <span className="text-lg">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                aria-hidden
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 7h18l-1.5 9a2 2 0 01-2 1.5H6.5A2 2 0 014.5 16L3 7z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M16 3a2 2 0 11-4 0"
+                />
+              </svg>
+            </span>
+            {!isCollapsed && (
+              <>
+                <span className="font-medium flex-1 text-left ml-3">
+                  All Products
+                </span>
+                <span
+                  className={`text-sm px-2 py-1 rounded-full ${
+                    activeCategory === "all"
+                      ? "bg-white/20 text-white"
+                      : "bg-gray-100 text-gray-500"
+                  }`}
+                >
+                  {categories.reduce((total, cat) => total + cat.count, 0)}
+                </span>
+              </>
+            )}
+          </button>
+
+          {/* Loading state */}
+          {categoriesLoading && !isCollapsed && (
+            <div className="flex items-center justify-center py-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#3474c0]"></div>
+              <span className="ml-2 text-sm text-gray-600">
+                Loading categories...
+              </span>
+            </div>
+          )}
+
+          {/* Error state */}
+          {categoriesError && !isCollapsed && (
+            <div className="text-center py-4">
+              <p className="text-sm text-red-600 mb-2">{categoriesError}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="text-sm text-[#3474c0] hover:underline"
+              >
+                Try again
+              </button>
+            </div>
+          )}
+
+          {/* Categories from API */}
+          {!categoriesLoading &&
+            !categoriesError &&
+            categories.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => handleCategorySelect(category.id)}
+                className={`flex items-center justify-center p-3 rounded-lg transition-colors ${
+                  activeCategory === category.id
+                    ? "bg-[#3474c0] text-white"
+                    : "hover:bg-gray-50 text-gray-700"
+                } ${isCollapsed ? "w-10 h-10" : "w-full justify-between"}`}
+                title={isCollapsed ? category.name : undefined}
+              >
+                <span className="text-lg">
+                  {getCategoryIcon(category.name)}
+                </span>
+                {!isCollapsed && (
+                  <>
+                    <span className="font-medium flex-1 text-left ml-3">
+                      {category.name}
+                    </span>
+                    <span
+                      className={`text-sm px-2 py-1 rounded-full ${
+                        activeCategory === category.id
+                          ? "bg-white/20 text-white"
+                          : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {category.count}
+                    </span>
+                  </>
+                )}
+              </button>
+            ))}
         </div>
       </div>
 
