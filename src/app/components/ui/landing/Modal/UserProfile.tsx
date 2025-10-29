@@ -3,17 +3,25 @@ import { User } from "iconsax-reactjs";
 
 interface UserProfileProps {
   onSignOut?: () => void;
+  user?: {
+    firstname: string;
+    lastname: string;
+    email: string;
+  } | null;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ onSignOut }) => {
+const UserProfile: React.FC<UserProfileProps> = ({ onSignOut, user }) => {
+  const displayName = user ? `${user.firstname} ${user.lastname}` : "User";
+  const displayEmail = user?.email || "user@example.com";
+
   return (
     <div className="space-y-6">
       <div className="text-center">
         <div className="w-20 h-20 bg-[#3474c0] rounded-full flex items-center justify-center mx-auto mb-4">
           <User size={32} color="white" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900">John Doe</h3>
-        <p className="text-gray-600">john.doe@example.com</p>
+        <h3 className="text-lg font-semibold text-gray-900">{displayName}</h3>
+        <p className="text-gray-600">{displayEmail}</p>
       </div>
 
       <div className="space-y-3">

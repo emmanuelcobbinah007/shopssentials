@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CloseCircle, ArrowLeft } from "iconsax-reactjs";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -6,6 +6,7 @@ import SignInForm from "./SignInForm";
 import SignUpForm from "./SignUpForm";
 import UserProfile from "./UserProfile";
 import ForgotPasswordForm from "./ForgotPasswordForm";
+import { useAuth } from "../../../../contexts/AuthContext";
 
 interface UserModalProps {
   handleClose: () => void;
@@ -15,13 +16,35 @@ interface UserModalProps {
 type ModalState = "signin" | "signup" | "profile" | "forgotpassword";
 
 const UserModal: React.FC<UserModalProps> = ({ handleClose, animateModal }) => {
+  const { user, isAuthenticated, login, logout, isLoading } = useAuth();
   const [currentState, setCurrentState] = useState<ModalState>("signin");
   const [isTransitioning, setIsTransitioning] = useState(false);
 
+  // Set initial state based on authentication status
+  useEffect(() => {
+    if (!isLoading) {
+      setCurrentState(isAuthenticated ? "profile" : "signin");
+    }
+  }, [isAuthenticated, isLoading]);
+
   // Form handlers
-  const handleSigninSubmit = (data: { email: string; password: string }) => {
-    console.log("Sign in:", data);
-    // Handle sign in logic here
+  const handleSigninSubmit = async (data: {
+    email: string;
+    password: string;
+  }) => {
+    try {
+      const response = await axios.post("/api/auth/login", data);
+
+      // Store user data in auth context
+      login(response.data.user);
+      toast.success("Login successful!");
+      changeState("profile");
+    } catch (error: any) {
+      console.error("Sign in error:", error);
+      const errorMessage =
+        error.response?.data?.error || "An error occurred during sign in.";
+      toast.error(errorMessage);
+    }
   };
 
   const handleSignupSubmit = async (data: {
@@ -49,8 +72,8 @@ const UserModal: React.FC<UserModalProps> = ({ handleClose, animateModal }) => {
   };
 
   const handleSignOut = () => {
-    console.log("Sign out");
-    // Handle sign out logic here
+    logout();
+    toast.success("Signed out successfully!");
     changeState("signin");
   };
 
@@ -137,7 +160,7 @@ const UserModal: React.FC<UserModalProps> = ({ handleClose, animateModal }) => {
             />
           )}
           {currentState === "profile" && (
-            <UserProfile onSignOut={handleSignOut} />
+            <UserProfile onSignOut={handleSignOut} user={user} />
           )}
           {currentState === "forgotpassword" && (
             <ForgotPasswordForm

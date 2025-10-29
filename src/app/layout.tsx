@@ -3,6 +3,7 @@ import Header from "./components/ui/landing/Header";
 import Footer from "./components/ui/landing/Footer";
 import { SearchProvider } from "./contexts/SearchContext";
 import { CartProvider } from "./contexts/CartContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import "./globals.css";
 import { Poppins } from "next/font/google";
 import FixedSearchButton from "./components/ui/landing/FixedSearchButton";
@@ -29,27 +30,29 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`antialiased ${poppins.variable} font-poppins`}>
-        <CartProvider>
-          <SearchProvider>
-            <Header />
-            <main>{children}</main>
-            <Footer />
-            <FixedSearchButton />
-            <GlobalSearch />
-          </SearchProvider>
-          <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-          />
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <SearchProvider>
+              <Header />
+              <main>{children}</main>
+              <Footer />
+              <FixedSearchButton />
+              <GlobalSearch />
+            </SearchProvider>
+            <ToastContainer
+              position="top-right"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="light"
+            />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );
