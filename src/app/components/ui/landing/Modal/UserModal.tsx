@@ -6,7 +6,7 @@ import SignInForm from "./SignInForm";
 import SignUpForm from "./SignUpForm";
 import UserProfile from "./UserProfile";
 import ForgotPasswordForm from "./ForgotPasswordForm";
-import { useAuth } from "../../../../contexts/AuthContext";
+import { useAuth } from "@/app/contexts/AuthContext";
 
 interface UserModalProps {
   handleClose: () => void;
@@ -160,7 +160,7 @@ const UserModal: React.FC<UserModalProps> = ({ handleClose, animateModal }) => {
             />
           )}
           {currentState === "profile" && (
-            <UserProfile onSignOut={handleSignOut} user={user} />
+            <UserProfile onSignOut={handleSignOut} />
           )}
           {currentState === "forgotpassword" && (
             <ForgotPasswordForm

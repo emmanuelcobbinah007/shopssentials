@@ -248,7 +248,11 @@ const Header: React.FC = () => {
 
       {/* Sidebar Modal */}
       {showCartModal && (
-        <CartModal handleClose={handleClose} animateModal={animateModal} />
+        <CartModal
+          handleClose={handleClose}
+          animateModal={animateModal}
+          onOpenUserModal={handleOpenUser}
+        />
       )}
 
       {/* User Modal */}

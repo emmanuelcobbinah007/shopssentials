@@ -1,18 +1,23 @@
 import React from "react";
 import { User } from "iconsax-reactjs";
+import { useAuth } from "@/app/contexts/AuthContext";
 
 interface UserProfileProps {
   onSignOut?: () => void;
-  user?: {
-    firstname: string;
-    lastname: string;
-    email: string;
-  } | null;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ onSignOut, user }) => {
+const UserProfile: React.FC<UserProfileProps> = ({ onSignOut }) => {
+  const { user, logout } = useAuth();
+
   const displayName = user ? `${user.firstname} ${user.lastname}` : "User";
   const displayEmail = user?.email || "user@example.com";
+
+  const handleSignOut = () => {
+    logout();
+    if (onSignOut) {
+      onSignOut();
+    }
+  };
 
   return (
     <div className="space-y-6">
