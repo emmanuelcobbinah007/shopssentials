@@ -3,6 +3,8 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import axios from "axios";
+import { useProduct } from "../../hooks/useProducts";
 
 interface ProductPageProps {
   params: Promise<{
@@ -10,26 +12,45 @@ interface ProductPageProps {
   }>;
 }
 
-// Component for suggested products in not found state
-async function SuggestedProducts() {
-  let suggestedProducts = [];
+// Move components outside of ProductPage to prevent recreation on every render
+function SuggestedProducts() {
+  const [suggestedProducts, setSuggestedProducts] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [hasFetched, setHasFetched] = React.useState(false);
 
-  try {
-    const response = await fetch(
-      `${
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
-      }/api/products?limit=4`,
-      {
-        cache: "no-store",
+  React.useEffect(() => {
+    if (hasFetched) return; // Prevent multiple fetches
+
+    const fetchSuggestedProducts = async () => {
+      try {
+        const response = await axios.get("/api/products?limit=4");
+        setSuggestedProducts(response.data.products.slice(0, 4));
+      } catch (err) {
+        console.error("Error fetching suggested products:", err);
+      } finally {
+        setLoading(false);
+        setHasFetched(true);
       }
-    );
+    };
 
-    if (response.ok) {
-      const data = await response.json();
-      suggestedProducts = data.products.slice(0, 4);
-    }
-  } catch (err) {
-    console.error("Error fetching suggested products:", err);
+    fetchSuggestedProducts();
+  }, []); // No dependencies since it only runs once
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="bg-white rounded-lg shadow-sm p-3 animate-pulse"
+          >
+            <div className="aspect-square bg-gray-200 rounded mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded mb-1"></div>
+            <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+          </div>
+        ))}
+      </div>
+    );
   }
 
   if (suggestedProducts.length === 0) {
@@ -69,31 +90,57 @@ async function SuggestedProducts() {
 }
 
 // Component for related products
-async function RelatedProducts({
-  currentProductId,
-}: {
-  currentProductId: string;
-}) {
-  let relatedProducts = [];
+function RelatedProducts({ currentProductId }: { currentProductId: string }) {
+  const [relatedProducts, setRelatedProducts] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [hasFetched, setHasFetched] = React.useState(false);
+  const prevProductIdRef = React.useRef<string | undefined>(undefined);
 
-  try {
-    const response = await fetch(
-      `${
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
-      }/api/products?limit=3`,
-      {
-        cache: "no-store",
-      }
-    );
-
-    if (response.ok) {
-      const data = await response.json();
-      relatedProducts = data.products
-        .filter((p: any) => p.id !== currentProductId)
-        .slice(0, 3);
+  // Reset fetch state when product changes
+  React.useEffect(() => {
+    if (prevProductIdRef.current !== currentProductId) {
+      setHasFetched(false);
+      setLoading(true);
+      setRelatedProducts([]);
+      prevProductIdRef.current = currentProductId;
     }
-  } catch (err) {
-    console.error("Error fetching related products:", err);
+  }, [currentProductId]);
+
+  React.useEffect(() => {
+    if (hasFetched || !currentProductId) return; // Prevent multiple fetches
+
+    const fetchRelatedProducts = async () => {
+      try {
+        const response = await axios.get("/api/products?limit=5");
+        const filtered = response.data.products
+          .filter((p: any) => p.id !== currentProductId)
+          .slice(0, 3);
+        setRelatedProducts(filtered);
+      } catch (err) {
+        console.error("Error fetching related products:", err);
+      } finally {
+        setLoading(false);
+        setHasFetched(true);
+      }
+    };
+
+    fetchRelatedProducts();
+  }, [currentProductId, hasFetched]);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bg-white rounded-lg shadow-sm animate-pulse">
+            <div className="aspect-square bg-gray-200 rounded-t-lg"></div>
+            <div className="p-4">
+              <div className="h-5 bg-gray-200 rounded mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   }
 
   if (relatedProducts.length === 0) {
@@ -135,6 +182,8 @@ async function RelatedProducts({
 // Client component for product display with image gallery
 function ProductDisplay({ product }: { product: any }) {
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
+  const [mainImageLoading, setMainImageLoading] = React.useState(true);
+  const [thumbnailLoading, setThumbnailLoading] = React.useState(true);
   const images =
     product.images && product.images.length > 0
       ? product.images
@@ -187,19 +236,26 @@ function ProductDisplay({ product }: { product: any }) {
             {/* Product Image Gallery */}
             <div className="space-y-4">
               <div className="aspect-square relative bg-white rounded-lg shadow-sm overflow-hidden">
+                {mainImageLoading && (
+                  <div className="absolute inset-0 bg-gray-200 animate-pulse">
+                    <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-shimmer"></div>
+                  </div>
+                )}
                 <Image
                   src={images[selectedImageIndex]}
                   alt={product.name}
                   fill
                   className="object-cover"
                   priority
+                  onLoad={() => setMainImageLoading(false)}
+                  onError={() => setMainImageLoading(false)}
                 />
               </div>
 
               {/* Image Gallery Thumbnails */}
               {images.length > 1 && (
                 <div className="grid grid-cols-4 gap-2">
-                  {images.map((imageUrl: string, index: number) => (
+                  {images.slice(0, 4).map((imageUrl: string, index: number) => (
                     <button
                       key={index}
                       onClick={() => setSelectedImageIndex(index)}
@@ -209,11 +265,24 @@ function ProductDisplay({ product }: { product: any }) {
                           : "border-gray-200 hover:border-gray-300"
                       } transition-colors`}
                     >
+                      {thumbnailLoading && (
+                        <div className="absolute inset-0 bg-gray-200 animate-pulse">
+                          <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-shimmer"></div>
+                        </div>
+                      )}
                       <Image
                         src={imageUrl}
                         alt={`${product.name} - Image ${index + 1}`}
                         fill
                         className="object-cover"
+                        onLoad={() => {
+                          // Set loading to false when any thumbnail loads
+                          if (thumbnailLoading) setThumbnailLoading(false);
+                        }}
+                        onError={() => {
+                          // Set loading to false on error
+                          if (thumbnailLoading) setThumbnailLoading(false);
+                        }}
                       />
                     </button>
                   ))}
@@ -305,10 +374,10 @@ function ProductDisplay({ product }: { product: any }) {
                     }`}
                     disabled={!product.inStock}
                   >
-                    {product.inStock ? "Add to Cart" : "Out of Stock"}
+                    {product.inStock ? "Buy Now" : "Out of Stock"}
                   </button>
                   <button className="px-6 py-3 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
-                    Add to Wishlist
+                    Add to Cart
                   </button>
                 </div>
               </div>
@@ -352,34 +421,27 @@ function ProductDisplay({ product }: { product: any }) {
   );
 }
 
-const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
-  const { productId } = await params;
+const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
+  const [productId, setProductId] = React.useState<string>("");
 
-  // Fetch product from API
-  let product = null;
-  let error = null;
+  // Unwrap params promise
+  React.useEffect(() => {
+    params.then((p) => setProductId(p.productId));
+  }, []); // Remove params from dependencies
 
-  try {
-    const response = await fetch(
-      `${
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
-      }/api/products/${productId}`,
-      {
-        cache: "no-store", // Ensure fresh data
-      }
+  // Use the client-side hook for data fetching
+  const { data: product, isLoading, error } = useProduct(productId);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3474c0] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading product...</p>
+        </div>
+      </div>
     );
-
-    if (response.ok) {
-      const data = await response.json();
-      product = data.product;
-    } else if (response.status === 404) {
-      error = "Product not found";
-    } else {
-      error = "Failed to load product";
-    }
-  } catch (err) {
-    console.error("Error fetching product:", err);
-    error = "Failed to load product";
   }
 
   // If there's an error or product not found, show beautiful not found state
@@ -409,7 +471,7 @@ const ProductPage: React.FC<ProductPageProps> = async ({ params }) => {
                 Product Not Found
               </h1>
               <p className="text-gray-600 mb-8">
-                {error === "Product not found"
+                {!product
                   ? "The product you're looking for doesn't exist or has been removed."
                   : "We couldn't load this product right now. Please try again later."}
               </p>

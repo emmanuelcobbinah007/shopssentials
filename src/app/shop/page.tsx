@@ -77,7 +77,10 @@ const ShopPage: React.FC = () => {
   };
 
   // Product card component
-  const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
+  const ProductCard: React.FC<{
+    product: Product;
+    viewMode: "grid" | "list";
+  }> = ({ product, viewMode }) => {
     const { addToCart, isInCart } = useCart();
 
     const handleAddToCart = (e: React.MouseEvent) => {
@@ -93,6 +96,92 @@ const ShopPage: React.FC = () => {
       };
       addToCart(cartProduct);
     };
+
+    if (viewMode === "list") {
+      return (
+        <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group">
+          <div className="flex flex-col sm:flex-row">
+            <Link
+              href={`/product/${product.id}`}
+              className="flex flex-col sm:flex-row flex-1"
+            >
+              <div className="relative w-full sm:w-48 h-32 sm:h-24 bg-gray-100 rounded-t-lg sm:rounded-l-lg sm:rounded-t-none overflow-hidden flex-shrink-0 p-2">
+                <Image
+                  src={product.image}
+                  alt={product.name}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300 rounded"
+                />
+                {product.isOnSale && (
+                  <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold">
+                    SALE
+                  </div>
+                )}
+                {!product.inStock && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <span className="text-white font-semibold text-sm">
+                      Out of Stock
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-[#3474c0] transition-colors text-lg">
+                      {product.name}
+                    </h3>
+                    <div className="flex items-center gap-2 mb-3">
+                      {renderStars(product.rating)}
+                      <span className="text-sm text-gray-500">
+                        ({product.reviews})
+                      </span>
+                    </div>
+                    <p className="text-gray-600 mb-3 line-clamp-2">
+                      {product.description}
+                    </p>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-xl font-bold text-[#3474c0]">
+                        {product.price}
+                      </span>
+                      {product.originalPrice && (
+                        <span className="text-lg text-gray-500 line-through">
+                          {product.originalPrice}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="sm:ml-6 mt-4 sm:mt-0">
+                    {product.inStock ? (
+                      <button
+                        onClick={handleAddToCart}
+                        className={`px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+                          isInCart(parseInt(product.id))
+                            ? "bg-green-500 text-white hover:bg-green-600"
+                            : "bg-[#3474c0] text-white hover:bg-[#2a5a9e]"
+                        }`}
+                      >
+                        <ShoppingBag size={16} />
+                        {isInCart(parseInt(product.id))
+                          ? "Added to Cart"
+                          : "Add to Cart"}
+                      </button>
+                    ) : (
+                      <button
+                        disabled
+                        className="px-6 py-3 rounded-lg font-medium bg-gray-300 text-gray-500 cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        Out of Stock
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group">
@@ -259,7 +348,7 @@ const ShopPage: React.FC = () => {
                 </div>
 
                 {/* View Mode Toggle */}
-                <div className="flex items-center gap-2 border border-gray-300 rounded-md p-1 self-start sm:self-auto">
+                <div className="items-center gap-2 border border-gray-300 rounded-md p-1 self-start sm:self-auto hidden sm:flex">
                   <button
                     onClick={() => setViewMode("grid")}
                     className={`p-2 rounded ${
@@ -299,7 +388,11 @@ const ShopPage: React.FC = () => {
             </div>
 
             {/* Products Grid */}
-            {products.length > 0 ? (
+            {isLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3474c0]"></div>
+              </div>
+            ) : products.length > 0 ? (
               <div
                 className={
                   viewMode === "grid"
@@ -308,7 +401,11 @@ const ShopPage: React.FC = () => {
                 }
               >
                 {products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    viewMode={viewMode}
+                  />
                 ))}
               </div>
             ) : (
