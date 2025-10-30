@@ -60,10 +60,9 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      cart: {
-        id: cart.id,
-        items: cart.cartItems,
-      },
+      success: true,
+      items: cart.cartItems,
+      total: cart.cartItems.length,
     });
   } catch (error) {
     console.error("Get cart error:", error);

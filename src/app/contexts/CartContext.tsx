@@ -1,6 +1,13 @@
 "use client";
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 import axios from "axios";
+import { useAuth } from "./AuthContext";
 
 interface Product {
   id: number;
@@ -22,12 +29,13 @@ interface CartState {
 }
 
 interface CartContextType extends CartState {
-  addToCart: (product: Product, quantity?: number) => Promise<void>;
-  removeFromCart: (productId: number) => Promise<void>;
-  updateQuantity: (productId: number, quantity: number) => Promise<void>;
+  addToCart: (product: Product, quantity?: number) => void;
+  removeFromCart: (productId: number) => void;
+  updateQuantity: (productId: number, quantity: number) => void;
   clearCart: () => void;
   isInCart: (productId: number) => boolean;
   loadUserCart: (userId: string) => Promise<void>;
+  syncCartWithServer: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -38,6 +46,20 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { user, isAuthenticated } = useAuth();
+
+  // Load cart when user logs in
+  useEffect(() => {
+    console.log("CartContext useEffect triggered:", {
+      isAuthenticated,
+      user: !!user,
+      itemsLength: items.length,
+    });
+    if (isAuthenticated && user && items.length === 0) {
+      console.log("Loading cart in CartContext for user:", user.id);
+      loadUserCart(user.id);
+    }
+  }, [isAuthenticated, user]);
 
   // Calculate total price
   const total = items.reduce((sum, item) => {
@@ -52,9 +74,14 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
   // Calculate total item count
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
-  const addToCart = async (product: Product, quantity: number = 1) => {
-    // For now, keep local state management until we implement user authentication
-    // This will be updated when we integrate with the API
+  const addToCart = (product: Product, quantity: number = 1) => {
+    if (!isAuthenticated || !user) {
+      throw new Error(
+        "Authentication required. Please log in to add items to your cart."
+      );
+    }
+
+    // Optimistic update - update local state immediately
     setItems((prevItems) => {
       const existingItem = prevItems.find(
         (item) => item.product.id === product.id
@@ -74,22 +101,32 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
     });
   };
 
-  const removeFromCart = async (productId: number) => {
-    // For now, keep local state management until we implement user authentication
-    // This will be updated when we integrate with the API
+  const removeFromCart = (productId: number) => {
+    if (!isAuthenticated || !user) {
+      throw new Error(
+        "Authentication required. Please log in to remove items from your cart."
+      );
+    }
+
+    // Optimistic update - update local state immediately
     setItems((prevItems) =>
       prevItems.filter((item) => item.product.id !== productId)
     );
   };
 
-  const updateQuantity = async (productId: number, quantity: number) => {
+  const updateQuantity = (productId: number, quantity: number) => {
+    if (!isAuthenticated || !user) {
+      throw new Error(
+        "Authentication required. Please log in to update your cart."
+      );
+    }
+
     if (quantity <= 0) {
-      await removeFromCart(productId);
+      removeFromCart(productId);
       return;
     }
 
-    // For now, keep local state management until we implement user authentication
-    // This will be updated when we integrate with the API
+    // Optimistic update - update local state immediately
     setItems((prevItems) =>
       prevItems.map((item) =>
         item.product.id === productId ? { ...item, quantity } : item
@@ -101,11 +138,39 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
     setItems([]);
   };
 
+  const syncCartWithServer = async () => {
+    if (!isAuthenticated || !user || items.length === 0) {
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      // Send the entire cart state to the server
+      const cartData = items.map((item) => ({
+        productId: item.product.id.toString(),
+        quantity: item.quantity,
+      }));
+
+      await axios.put("/api/cart/sync", {
+        userId: user.id,
+        items: cartData,
+      });
+    } catch (error) {
+      console.error("Error syncing cart with server:", error);
+      // Reload cart from server to ensure consistency
+      await loadUserCart(user.id);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const isInCart = (productId: number) => {
     return items.some((item) => item.product.id === productId);
   };
 
   const loadUserCart = async (userId: string) => {
+    console.log("loadUserCart called for userId:", userId);
     try {
       setIsLoading(true);
       const response = await axios.get(`/api/cart?userId=${userId}`);
@@ -120,6 +185,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
         },
         quantity: item.quantity,
       }));
+      console.log("Setting cart items from API:", cartItems.length);
       setItems(cartItems);
     } catch (error) {
       console.error("Error loading user cart:", error);
@@ -140,6 +206,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
     clearCart,
     isInCart,
     loadUserCart,
+    syncCartWithServer,
     isLoading,
   };
 

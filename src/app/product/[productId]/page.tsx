@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
 import { useProduct } from "../../hooks/useProducts";
+import { useCart } from "../../contexts/CartContext";
+import { toast } from "react-toastify";
 
 interface ProductPageProps {
   params: Promise<{
@@ -184,6 +186,8 @@ function ProductDisplay({ product }: { product: any }) {
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
   const [mainImageLoading, setMainImageLoading] = React.useState(true);
   const [thumbnailLoading, setThumbnailLoading] = React.useState(true);
+  const [selectedQuantity, setSelectedQuantity] = React.useState(1);
+  const { addToCart, isLoading: cartLoading } = useCart();
   const images =
     product.images && product.images.length > 0
       ? product.images
@@ -208,6 +212,34 @@ function ProductDisplay({ product }: { product: any }) {
         </span>
       </div>
     );
+  };
+
+  const handleAddToCart = async () => {
+    try {
+      // Transform product data to match CartContext Product interface
+      const cartProduct = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.images?.[0]?.url || product.image,
+        category: product.categoryName || product.category,
+      };
+
+      await addToCart(cartProduct, selectedQuantity);
+      toast.success(`Added ${selectedQuantity} ${product.name} to cart!`);
+    } catch (error: any) {
+      console.error("Error adding to cart:", error);
+
+      // Check if it's an authentication error
+      if (
+        error.message?.includes("Authentication required") ||
+        error.response?.status === 401
+      ) {
+        toast.error("You must be signed in to add items to your cart");
+      } else {
+        toast.error("Failed to add item to cart. Please try again.");
+      }
+    }
   };
 
   return (
@@ -353,8 +385,11 @@ function ProductDisplay({ product }: { product: any }) {
                   </label>
                   <select
                     id="quantity"
+                    value={selectedQuantity}
+                    onChange={(e) =>
+                      setSelectedQuantity(Number(e.target.value))
+                    }
                     className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#3474c0]"
-                    defaultValue="1"
                   >
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                       <option key={num} value={num}>
@@ -376,8 +411,12 @@ function ProductDisplay({ product }: { product: any }) {
                   >
                     {product.inStock ? "Buy Now" : "Out of Stock"}
                   </button>
-                  <button className="px-6 py-3 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
-                    Add to Cart
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={cartLoading || !product.inStock}
+                    className="px-6 py-3 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {cartLoading ? "Adding..." : "Add to Cart"}
                   </button>
                 </div>
               </div>

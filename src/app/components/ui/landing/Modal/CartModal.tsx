@@ -4,6 +4,7 @@ import { CloseCircle, Add, Minus, Trash } from "iconsax-reactjs";
 import { useCart, CartItem } from "@/app/contexts/CartContext";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+import CheckoutModal from "./CheckoutModal";
 
 interface CartModalProps {
   handleClose: () => void;
@@ -29,28 +30,71 @@ const CartModal: React.FC<CartModalProps> = ({
     updateQuantity,
     removeFromCart,
     loadUserCart,
+    syncCartWithServer,
     isLoading: cartLoading,
   } = useCart();
   const router = useRouter();
   const [cartInitialized, setCartInitialized] = useState(false);
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [animateCheckoutModal, setAnimateCheckoutModal] = useState(false);
 
-  // Initialize cart when modal opens and user is authenticated
+  // Initialize cart when modal opens and user is authenticated (only if not already loaded)
   useEffect(() => {
-    if (animateModal && isAuthenticated && user && !cartInitialized) {
+    console.log("CartModal useEffect triggered:", {
+      animateModal,
+      isAuthenticated,
+      user: !!user,
+      itemsLength: items.length,
+      cartInitialized,
+    });
+    if (
+      animateModal &&
+      isAuthenticated &&
+      user &&
+      items.length === 0 &&
+      !cartInitialized
+    ) {
+      console.log("Loading cart for user:", user.id);
       loadUserCart(user.id);
       setCartInitialized(true);
     }
-  }, [animateModal, isAuthenticated, user, cartInitialized, loadUserCart]);
+  }, [
+    animateModal,
+    isAuthenticated,
+    user,
+    items.length,
+    cartInitialized,
+    loadUserCart,
+  ]);
 
-  // Reset cart initialization when modal closes
+  // Reset cart initialization and sync with server when modal closes
   useEffect(() => {
-    if (!animateModal) {
+    if (!animateModal && cartInitialized) {
+      // Sync cart changes with server when modal closes
+      syncCartWithServer().catch((error) => {
+        console.error("Failed to sync cart with server:", error);
+      });
       setCartInitialized(false);
     }
-  }, [animateModal]);
+  }, [animateModal, cartInitialized, syncCartWithServer]);
 
-  const formatPrice = (price: string) => {
-    return price;
+  const handleOpenCheckout = async () => {
+    try {
+      // Sync cart with server before opening checkout
+      await syncCartWithServer();
+      setShowCheckoutModal(true);
+      setTimeout(() => setAnimateCheckoutModal(true), 10);
+    } catch (error) {
+      console.error("Failed to sync cart before checkout:", error);
+      // Still open checkout even if sync fails
+      setShowCheckoutModal(true);
+      setTimeout(() => setAnimateCheckoutModal(true), 10);
+    }
+  };
+
+  const handleCloseCheckout = () => {
+    setAnimateCheckoutModal(false);
+    setTimeout(() => setShowCheckoutModal(false), 300);
   };
 
   const LoginPrompt = () => (
@@ -122,6 +166,17 @@ const CartModal: React.FC<CartModalProps> = ({
       </button>
     </div>
   );
+
+  const formatPrice = (price: string | number) => {
+    const numericPrice =
+      typeof price === "string"
+        ? parseFloat(price.replace(/[₵GHS\s,]/g, ""))
+        : price;
+    return `₵${numericPrice.toLocaleString("en-GH", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  };
 
   const CartItem = ({ item }: { item: CartItem }) => (
     <div className="flex items-center gap-3 py-4 border-b border-gray-100 last:border-b-0">
@@ -322,7 +377,10 @@ const CartModal: React.FC<CartModalProps> = ({
             </div>
 
             {/* Checkout Button */}
-            <button className="w-full bg-[#3474c0] text-white py-3 rounded-lg font-semibold hover:bg-[#2a5a9e] transition-colors mb-3">
+            <button
+              onClick={handleOpenCheckout}
+              className="w-full bg-[#3474c0] text-white py-3 rounded-lg font-semibold hover:bg-[#2a5a9e] transition-colors mb-3"
+            >
               Proceed to Checkout
             </button>
 
@@ -335,6 +393,14 @@ const CartModal: React.FC<CartModalProps> = ({
           </>
         )}
       </div>
+
+      {/* Checkout Modal */}
+      {showCheckoutModal && (
+        <CheckoutModal
+          handleClose={handleCloseCheckout}
+          animateModal={animateCheckoutModal}
+        />
+      )}
     </div>
   );
 };
