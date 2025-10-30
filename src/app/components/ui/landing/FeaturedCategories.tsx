@@ -1,9 +1,9 @@
 "use client";
 
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
-import { motion, useAnimation, AnimatePresence } from 'framer-motion';
-import { useInView } from 'react-intersection-observer';
+import { motion, useAnimation, AnimatePresence } from "framer-motion";
+import { useInView } from "react-intersection-observer";
 
 // Define the FeaturedCategory interface
 interface FeaturedCategory {
@@ -13,28 +13,27 @@ interface FeaturedCategory {
 
 // Animation Variants
 const containerVariants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.15,
-      },
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.15,
     },
-  };
+  },
+};
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: 'easeOut' },
-    },
-    exit: { opacity: 0, y: 30, transition: { duration: 0.4 } },
-  };
+const cardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" },
+  },
+  exit: { opacity: 0, y: 30, transition: { duration: 0.4 } },
+};
 
 const FeaturedCategories: React.FC = () => {
-    const controls = useAnimation();
+  const controls = useAnimation();
   const [ref, inView] = useInView({ triggerOnce: false, threshold: 0.1 });
-
 
   const featuredCategories = [
     {
@@ -66,9 +65,9 @@ const FeaturedCategories: React.FC = () => {
 
   useEffect(() => {
     if (inView) {
-      controls.start('visible');
+      controls.start("visible");
     } else {
-      controls.start('hidden');
+      controls.start("hidden");
     }
   }, [controls, inView]);
 
@@ -97,7 +96,12 @@ const FeaturedCategories: React.FC = () => {
                 exit="exit"
                 className="flex flex-col items-center p-6 bg-[#F9FAFB] rounded-xl shadow hover:shadow-lg hover:scale-105 transition hover:border hover:border-blue-500 duration-300 cursor-pointer"
               >
-                <Image src={category.imageURL} alt="Shelving Icon" width={64} height={64} />
+                <Image
+                  src={category.imageURL}
+                  alt="Shelving Icon"
+                  width={64}
+                  height={64}
+                />
                 <h3 className="mt-4 font-medium text-[#1A1D23]">
                   {category.name}
                 </h3>

@@ -1,16 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-
-interface Category {
-  id: string;
-  name: string;
-  count: number;
-  subCategories?: Array<{
-    id: string;
-    name: string;
-  }>;
-}
+import React, { useState } from "react";
+import { useCategories, Category } from "../../../hooks/useProducts";
 
 interface Filters {
   priceRange: [number, number];
@@ -32,28 +22,14 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [selectedRating, setSelectedRating] = useState(0);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
-  const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
-  // Fetch categories on component mount
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setCategoriesLoading(true);
-        setCategoriesError(null);
-        const response = await axios.get("/api/categories");
-        setCategories(response.data.categories);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-        setCategoriesError("Failed to load categories");
-      } finally {
-        setCategoriesLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
+  // Use TanStack Query for categories
+  const {
+    data: categoriesData,
+    isLoading: categoriesLoading,
+    error: categoriesError,
+  } = useCategories();
+  const categories = categoriesData || [];
 
   const handleCategorySelect = (categoryId: string) => {
     setActiveCategory(categoryId);
@@ -258,7 +234,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                       : "bg-gray-100 text-gray-500"
                   }`}
                 >
-                  {categories.reduce((total, cat) => total + cat.count, 0)}
+                  {categories.reduce(
+                    (total, cat) => total + (cat.count || 0),
+                    0
+                  )}
                 </span>
               </>
             )}
@@ -277,7 +256,9 @@ const Sidebar: React.FC<SidebarProps> = ({
           {/* Error state */}
           {categoriesError && !isCollapsed && (
             <div className="text-center py-4">
-              <p className="text-sm text-red-600 mb-2">{categoriesError}</p>
+              <p className="text-sm text-red-600 mb-2">
+                {categoriesError.message || "Failed to load categories"}
+              </p>
               <button
                 onClick={() => window.location.reload()}
                 className="text-sm text-[#3474c0] hover:underline"
@@ -316,7 +297,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                           : "bg-gray-100 text-gray-500"
                       }`}
                     >
-                      {category.count}
+                      {category.count || 0}
                     </span>
                   </>
                 )}

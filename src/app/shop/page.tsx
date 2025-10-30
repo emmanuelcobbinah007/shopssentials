@@ -5,30 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import Sidebar from "../components/ui/landing/Sidebar";
 import { useCart } from "../contexts/CartContext";
+import { useProducts, Product } from "../hooks/useProducts";
 import { ShoppingBag } from "iconsax-reactjs";
-import axios from "axios";
-
-interface Product {
-  id: string;
-  name: string;
-  price: string;
-  originalPrice?: string;
-  image: string;
-  description: string;
-  category: string;
-  rating: number;
-  reviews: number;
-  inStock: boolean;
-  isOnSale: boolean;
-  categoryId: string;
-  subCategoryId?: string;
-}
 
 const ShopPage: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<string>("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -41,48 +21,19 @@ const ShopPage: React.FC = () => {
     search: "",
   });
 
-  // Fetch products from API
-  const fetchProducts = async (filters = currentFilters, sort = sortBy) => {
-    try {
-      setLoading(true);
-      setError(null);
+  // Use TanStack Query for products
+  const { data, isLoading, error } = useProducts({
+    ...currentFilters,
+    sortBy,
+  });
 
-      const params = new URLSearchParams();
-      if (filters.categoryId !== "all")
-        params.append("categoryId", filters.categoryId);
-      if (filters.subCategoryId !== "all")
-        params.append("subCategoryId", filters.subCategoryId);
-      if (filters.minPrice > 0)
-        params.append("minPrice", filters.minPrice.toString());
-      if (filters.maxPrice < 10000)
-        params.append("maxPrice", filters.maxPrice.toString());
-      if (filters.inStock) params.append("inStock", "true");
-      if (filters.search) params.append("search", filters.search);
-      params.append("sortBy", sort);
-
-      const response = await axios.get(`/api/products?${params}`);
-      const fetchedProducts = response.data.products;
-
-      setProducts(fetchedProducts);
-      setFilteredProducts(fetchedProducts);
-    } catch (err) {
-      console.error("Error fetching products:", err);
-      setError("Failed to load products. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Initial load
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  const products = data?.products || [];
+  const totalProducts = data?.total || 0;
 
   // Handle category filtering
   const handleCategoryChange = (categoryId: string) => {
     const newFilters = { ...currentFilters, categoryId };
     setCurrentFilters(newFilters);
-    fetchProducts(newFilters, sortBy);
     setIsSidebarOpen(false);
   };
 
@@ -99,14 +50,12 @@ const ShopPage: React.FC = () => {
       inStock: filters.inStockOnly,
     };
     setCurrentFilters(newFilters);
-    fetchProducts(newFilters, sortBy);
     setIsSidebarOpen(false);
   };
 
   // Handle sorting
   const handleSort = (sortOption: string) => {
     setSortBy(sortOption);
-    fetchProducts(currentFilters, sortOption);
   };
 
   // Render star rating
@@ -255,8 +204,8 @@ const ShopPage: React.FC = () => {
                     Shop All Products
                   </h1>
                   <p className="text-gray-600 mt-1 text-sm sm:text-base">
-                    {filteredProducts.length} product
-                    {filteredProducts.length !== 1 ? "s" : ""} found
+                    {products.length} product
+                    {products.length !== 1 ? "s" : ""} found
                   </p>
                 </div>
 
@@ -350,7 +299,7 @@ const ShopPage: React.FC = () => {
             </div>
 
             {/* Products Grid */}
-            {filteredProducts.length > 0 ? (
+            {products.length > 0 ? (
               <div
                 className={
                   viewMode === "grid"
@@ -358,7 +307,7 @@ const ShopPage: React.FC = () => {
                     : "space-y-4"
                 }
               >
-                {filteredProducts.map((product) => (
+                {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
@@ -390,7 +339,7 @@ const ShopPage: React.FC = () => {
                       search: "",
                     };
                     setCurrentFilters(resetFilters);
-                    fetchProducts(resetFilters, sortBy);
+                    setSortBy("name");
                   }}
                   className="bg-[#3474c0] text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-[#4f8bd6] transition-colors text-sm sm:text-base"
                 >
