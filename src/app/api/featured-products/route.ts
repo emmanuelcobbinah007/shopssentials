@@ -3,7 +3,7 @@ import { PrismaClient } from "../../../generated/prisma";
 
 const prisma = new PrismaClient();
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Fetch featured products with their images and categories
     const featuredProducts = await prisma.featuredProduct.findMany({

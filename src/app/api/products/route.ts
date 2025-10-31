@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build orderBy clause
-    let orderBy: any = {};
+    const orderBy: Record<string, string> = {};
     switch (sortBy) {
       case "name":
         orderBy.name = sortOrder;

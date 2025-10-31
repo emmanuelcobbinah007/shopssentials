@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CloseCircle, ArrowLeft } from "iconsax-reactjs";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { toast } from "react-toastify";
 import SignInForm from "./SignInForm";
 import SignUpForm from "./SignUpForm";
