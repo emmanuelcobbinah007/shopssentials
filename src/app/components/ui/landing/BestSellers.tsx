@@ -202,8 +202,8 @@ const BestSellers: React.FC = () => {
               No Featured Products Yet
             </h3>
             <p className="text-gray-600 mb-6">
-              We're currently curating our featured products. Check back soon
-              for amazing deals and top-quality items!
+              We&apos;re currently curating our featured products. Check back
+              soon for amazing deals and top-quality items!
             </p>
             <Link
               href="/shop"

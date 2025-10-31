@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { CloseCircle } from "iconsax-reactjs";
 import { useCart } from "@/app/contexts/CartContext";
 import { useAuth } from "@/app/contexts/AuthContext";
+import Image from "next/image";
 
 interface CheckoutModalProps {
   handleClose: () => void;
@@ -14,7 +15,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 }) => {
   const { user } = useAuth();
   const { items, total, itemCount } = useCart();
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const [shippingInfo, setShippingInfo] = useState({
     firstName: user?.firstname || "",
@@ -97,9 +97,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   className="flex items-center gap-3 py-2 border-b border-gray-100 last:border-b-0"
                 >
                   <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <img
+                    <Image
                       src={item.product.image}
                       alt={item.product.name}
+                      width={48}
+                      height={48}
                       className="w-full h-full object-cover rounded-lg"
                     />
                   </div>
@@ -279,12 +281,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
           {/* Checkout Button */}
           <button
             onClick={handleCheckout}
-            disabled={isProcessing}
-            className="w-full bg-[#3474c0] text-white py-3 rounded-lg font-semibold hover:bg-[#2a5a9e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#3474c0] text-white py-3 rounded-lg font-semibold hover:bg-[#2a5a9e] transition-colors"
           >
-            {isProcessing
-              ? "Processing..."
-              : `Complete Order - ${formatPrice(total)}`}
+            Complete Order - {formatPrice(total)}
           </button>
 
           <button

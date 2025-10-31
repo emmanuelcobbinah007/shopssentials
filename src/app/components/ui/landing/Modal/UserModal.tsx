@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CloseCircle, ArrowLeft } from "iconsax-reactjs";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { toast } from "react-toastify";
 import SignInForm from "./SignInForm";
 import SignUpForm from "./SignUpForm";
@@ -16,7 +16,7 @@ interface UserModalProps {
 type ModalState = "signin" | "signup" | "profile" | "forgotpassword";
 
 const UserModal: React.FC<UserModalProps> = ({ handleClose, animateModal }) => {
-  const { user, isAuthenticated, login, logout, isLoading } = useAuth();
+  const { isAuthenticated, login, logout, isLoading } = useAuth();
   const [currentState, setCurrentState] = useState<ModalState>("signin");
   const [isTransitioning, setIsTransitioning] = useState(false);
 
@@ -39,10 +39,12 @@ const UserModal: React.FC<UserModalProps> = ({ handleClose, animateModal }) => {
       login(response.data.user);
       toast.success("Login successful!");
       changeState("profile");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Sign in error:", error);
       const errorMessage =
-        error.response?.data?.error || "An error occurred during sign in.";
+        axios.isAxiosError(error) && error.response?.data?.error
+          ? error.response.data.error
+          : "An error occurred during sign in.";
       toast.error(errorMessage);
     }
   };
@@ -54,14 +56,16 @@ const UserModal: React.FC<UserModalProps> = ({ handleClose, animateModal }) => {
     confirmPassword: string;
   }) => {
     try {
-      const response = await axios.post("/api/auth/signup", data);
+      await axios.post("/api/auth/signup", data);
 
       toast.success("Account created successfully! Please sign in.");
       changeState("signin");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Sign up error:", error);
       const errorMessage =
-        error.response?.data?.error || "An error occurred during sign up.";
+        axios.isAxiosError(error) && error.response?.data?.error
+          ? error.response.data.error
+          : "An error occurred during sign up.";
       toast.error(errorMessage);
     }
   };

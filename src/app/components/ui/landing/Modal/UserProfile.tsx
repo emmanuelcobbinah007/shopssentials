@@ -12,13 +12,6 @@ const UserProfile: React.FC<UserProfileProps> = ({ onSignOut }) => {
   const displayName = user ? `${user.firstname} ${user.lastname}` : "User";
   const displayEmail = user?.email || "user@example.com";
 
-  const handleSignOut = () => {
-    logout();
-    if (onSignOut) {
-      onSignOut();
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -48,7 +41,10 @@ const UserProfile: React.FC<UserProfileProps> = ({ onSignOut }) => {
         </button>
 
         <button
-          onClick={onSignOut}
+          onClick={() => {
+            logout();
+            if (onSignOut) onSignOut();
+          }}
           className="w-full text-left p-3 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
         >
           <div className="font-medium">Sign Out</div>

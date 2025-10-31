@@ -59,7 +59,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
       console.log("Loading cart in CartContext for user:", user.id);
       loadUserCart(user.id);
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Calculate total price
   const total = items.reduce((sum, item) => {
@@ -175,16 +175,28 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
       setIsLoading(true);
       const response = await axios.get(`/api/cart?userId=${userId}`);
       // Transform the API response to match our CartItem interface
-      const cartItems: CartItem[] = response.data.items.map((item: any) => ({
-        product: {
-          id: item.product.id,
-          name: item.product.name,
-          price: `₵${item.product.price.toFixed(2)}`,
-          image: item.product.images?.[0]?.url || "/placeholder-image.jpg",
-          category: item.product.category?.name || "General",
-        },
-        quantity: item.quantity,
-      }));
+      const cartItems: CartItem[] = response.data.items.map((item: unknown) => {
+        const i = item as {
+          product: {
+            id: string;
+            name: string;
+            price: number;
+            images?: { url: string }[];
+            category?: { name: string };
+          };
+          quantity: number;
+        };
+        return {
+          product: {
+            id: i.product.id,
+            name: i.product.name,
+            price: `₵${i.product.price.toFixed(2)}`,
+            image: i.product.images?.[0]?.url || "/placeholder-image.jpg",
+            category: i.product.category?.name || "General",
+          },
+          quantity: i.quantity,
+        };
+      });
       console.log("Setting cart items from API:", cartItems.length);
       setItems(cartItems);
     } catch (error) {

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useCategories, Category } from "../../../hooks/useProducts";
+import { useCategories } from "../../../hooks/useProducts";
 
 interface Filters {
   priceRange: [number, number];

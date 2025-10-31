@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
-import { useProduct } from "../../hooks/useProducts";
+import { useProduct, Product } from "../../hooks/useProducts";
 import { useCart } from "../../contexts/CartContext";
 import { toast } from "react-toastify";
 
@@ -16,7 +16,9 @@ interface ProductPageProps {
 
 // Move components outside of ProductPage to prevent recreation on every render
 function SuggestedProducts() {
-  const [suggestedProducts, setSuggestedProducts] = React.useState<any[]>([]);
+  const [suggestedProducts, setSuggestedProducts] = React.useState<Product[]>(
+    []
+  );
   const [loading, setLoading] = React.useState(true);
   const [hasFetched, setHasFetched] = React.useState(false);
 
@@ -36,7 +38,7 @@ function SuggestedProducts() {
     };
 
     fetchSuggestedProducts();
-  }, []); // No dependencies since it only runs once
+  }, [hasFetched]);
 
   if (loading) {
     return (
@@ -65,7 +67,7 @@ function SuggestedProducts() {
 
   return (
     <div className="grid grid-cols-2 gap-4">
-      {suggestedProducts.map((suggestedProduct: any) => (
+      {suggestedProducts.map((suggestedProduct) => (
         <Link
           key={suggestedProduct.id}
           href={`/product/${suggestedProduct.id}`}
@@ -93,7 +95,7 @@ function SuggestedProducts() {
 
 // Component for related products
 function RelatedProducts({ currentProductId }: { currentProductId: string }) {
-  const [relatedProducts, setRelatedProducts] = React.useState<any[]>([]);
+  const [relatedProducts, setRelatedProducts] = React.useState<Product[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [hasFetched, setHasFetched] = React.useState(false);
   const prevProductIdRef = React.useRef<string | undefined>(undefined);
@@ -114,8 +116,8 @@ function RelatedProducts({ currentProductId }: { currentProductId: string }) {
     const fetchRelatedProducts = async () => {
       try {
         const response = await axios.get("/api/products?limit=5");
-        const filtered = response.data.products
-          .filter((p: any) => p.id !== currentProductId)
+        const filtered = (response.data.products as Product[])
+          .filter((p) => p.id !== currentProductId)
           .slice(0, 3);
         setRelatedProducts(filtered);
       } catch (err) {
@@ -155,7 +157,7 @@ function RelatedProducts({ currentProductId }: { currentProductId: string }) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {relatedProducts.map((relatedProduct: any) => (
+      {relatedProducts.map((relatedProduct) => (
         <Link
           key={relatedProduct.id}
           href={`/product/${relatedProduct.id}`}
@@ -182,6 +184,7 @@ function RelatedProducts({ currentProductId }: { currentProductId: string }) {
 }
 
 // Client component for product display with image gallery
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function ProductDisplay({ product }: { product: any }) {
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
   const [mainImageLoading, setMainImageLoading] = React.useState(true);
@@ -227,13 +230,14 @@ function ProductDisplay({ product }: { product: any }) {
 
       await addToCart(cartProduct, selectedQuantity);
       toast.success(`Added ${selectedQuantity} ${product.name} to cart!`);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error adding to cart:", error);
 
       // Check if it's an authentication error
       if (
-        error.message?.includes("Authentication required") ||
-        error.response?.status === 401
+        axios.isAxiosError(error) &&
+        (error.message?.includes("Authentication required") ||
+          error.response?.status === 401)
       ) {
         toast.error("You must be signed in to add items to your cart");
       } else {
@@ -466,7 +470,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
   // Unwrap params promise
   React.useEffect(() => {
     params.then((p) => setProductId(p.productId));
-  }, []); // Remove params from dependencies
+  }, [params]);
 
   // Use the client-side hook for data fetching
   const { data: product, isLoading, error } = useProduct(productId);
