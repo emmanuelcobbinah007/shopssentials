@@ -94,7 +94,7 @@ const ShopPage: React.FC = () => {
         image: product.image,
         category: product.category,
       };
-      addToCart(cartProduct);
+      addToCart(cartProduct, 1);
     };
 
     if (viewMode === "list") {
