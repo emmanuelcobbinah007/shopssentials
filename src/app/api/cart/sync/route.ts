@@ -33,7 +33,7 @@ export async function PUT(request: NextRequest) {
     // Create new cart items
     if (items.length > 0) {
       await prisma.cartItem.createMany({
-        data: items.map((item: any) => ({
+        data: items.map((item: { productId: string; quantity: number }) => ({
           cartId: cart.id,
           productId: item.productId,
           quantity: item.quantity,
