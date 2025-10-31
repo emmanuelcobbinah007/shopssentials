@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Sidebar from "../components/ui/landing/Sidebar";
@@ -22,13 +22,12 @@ const ShopPage: React.FC = () => {
   });
 
   // Use TanStack Query for products
-  const { data, isLoading, error } = useProducts({
+  const { data, isLoading } = useProducts({
     ...currentFilters,
     sortBy,
   });
 
   const products = data?.products || [];
-  const totalProducts = data?.total || 0;
 
   // Handle category filtering
   const handleCategoryChange = (categoryId: string) => {

@@ -162,7 +162,7 @@ const Newsletter: React.FC = () => {
 
           {isAuthenticated && status !== "already-subscribed" && (
             <p className="mt-4 text-blue-100 text-sm">
-              You're logged in as {user?.email}
+              You&apos;re logged in as {user?.email}
             </p>
           )}
         </div>
