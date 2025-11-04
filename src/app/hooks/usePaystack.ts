@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useAuth } from "@/app/contexts/AuthContext";
 import "@/app/types/paystack";
 
 interface PaymentData {
@@ -16,14 +15,22 @@ interface PaymentData {
   };
 }
 
+interface PaystackResponse {
+  message: string;
+  reference: string;
+  status: string;
+  trans: string;
+  transaction: string;
+  trxref: string;
+}
+
 interface UsePaystackProps {
-  onSuccess?: (response: any) => void;
+  onSuccess?: (response: PaystackResponse) => void;
   onClose?: () => void;
 }
 
 export const usePaystack = ({ onSuccess, onClose }: UsePaystackProps = {}) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
 
   const initializePayment = (paymentData: PaymentData) => {
     if (!window.PaystackPop) {
@@ -46,7 +53,7 @@ export const usePaystack = ({ onSuccess, onClose }: UsePaystackProps = {}) => {
       currency: paymentData.currency,
       ref: paymentData.reference,
       metadata: paymentData.metadata,
-      callback: function (response: any) {
+      callback: function (response: PaystackResponse) {
         setIsLoading(false);
         if (onSuccess) {
           onSuccess(response);

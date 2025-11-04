@@ -1,4 +1,13 @@
 // Paystack types
+export interface PaystackResponse {
+  message: string;
+  reference: string;
+  status: string;
+  trans: string;
+  transaction: string;
+  trxref: string;
+}
+
 export interface PaystackOptions {
   key: string;
   email: string;
@@ -12,7 +21,7 @@ export interface PaystackOptions {
       value: string;
     }>;
   };
-  callback: (response: any) => void;
+  callback: (response: PaystackResponse) => void;
   onClose: () => void;
 }
 

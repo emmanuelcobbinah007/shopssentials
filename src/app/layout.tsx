@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import Header from "./components/ui/landing/Header";
 import Footer from "./components/ui/landing/Footer";
 import { SearchProvider } from "./contexts/SearchContext";
@@ -28,10 +29,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <script src="https://js.paystack.co/v1/inline.js"></script>
-      </head>
       <body className={`antialiased ${poppins.variable} font-poppins`}>
+        <Script
+          src="https://js.paystack.co/v1/inline.js"
+          strategy="afterInteractive"
+        />
         <Providers>
           <SearchProvider>
             <Header />

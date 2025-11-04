@@ -7,7 +7,7 @@ import axios from "axios";
 import { useProduct, Product } from "../../hooks/useProducts";
 import { useCart } from "../../contexts/CartContext";
 import { useAuth } from "../../contexts/AuthContext";
-import { usePaystack, toKobo } from "../../hooks/usePaystack";
+import { usePaystack } from "../../hooks/usePaystack";
 import { toast } from "react-toastify";
 import CheckoutModal from "../../components/ui/landing/Modal/CheckoutModal";
 
@@ -206,7 +206,7 @@ function ProductDisplay({ product }: { product: any }) {
       : [product.image];
 
   // Buy Now functionality with Paystack
-  const { initializePayment, generateReference, verifyPayment } = usePaystack({
+  const { verifyPayment } = usePaystack({
     onSuccess: async (response) => {
       try {
         setIsProcessing(true);
