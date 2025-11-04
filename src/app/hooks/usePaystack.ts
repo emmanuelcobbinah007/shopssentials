@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import "@/app/types/paystack";
 
 interface PaymentData {
@@ -31,10 +31,51 @@ interface UsePaystackProps {
 
 export const usePaystack = ({ onSuccess, onClose }: UsePaystackProps = {}) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isPaystackReady, setIsPaystackReady] = useState(false);
+
+  // Check if Paystack is ready
+  React.useEffect(() => {
+    const checkPaystackReady = () => {
+      if (typeof window !== "undefined" && window.PaystackPop) {
+        setIsPaystackReady(true);
+        return true;
+      }
+      return false;
+    };
+
+    // Check immediately
+    if (checkPaystackReady()) return;
+
+    // If not ready, check periodically
+    const interval = setInterval(() => {
+      if (checkPaystackReady()) {
+        clearInterval(interval);
+      }
+    }, 100);
+
+    // Clean up after 10 seconds
+    const timeout = setTimeout(() => {
+      clearInterval(interval);
+      console.warn("Paystack script did not load within 10 seconds");
+    }, 10000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, []);
 
   const initializePayment = (paymentData: PaymentData) => {
-    if (!window.PaystackPop) {
-      console.error("Paystack script not loaded");
+    // Check if script is loaded
+    if (typeof window === "undefined") {
+      console.error("Window object not available");
+      return;
+    }
+
+    if (!isPaystackReady || !window.PaystackPop) {
+      console.error(
+        "Paystack script not ready. Please wait for the page to fully load."
+      );
       return;
     }
 
@@ -46,28 +87,39 @@ export const usePaystack = ({ onSuccess, onClose }: UsePaystackProps = {}) => {
 
     setIsLoading(true);
 
-    const handler = window.PaystackPop.setup({
-      key: publicKey,
-      email: paymentData.email,
-      amount: paymentData.amount,
-      currency: paymentData.currency,
-      ref: paymentData.reference,
-      metadata: paymentData.metadata,
-      callback: function (response: PaystackResponse) {
-        setIsLoading(false);
-        if (onSuccess) {
-          onSuccess(response);
-        }
-      },
-      onClose: function () {
-        setIsLoading(false);
-        if (onClose) {
-          onClose();
-        }
-      },
-    });
+    // Small delay to ensure DOM is ready
+    setTimeout(() => {
+      try {
+        const handler = window.PaystackPop.setup({
+          key: publicKey,
+          email: paymentData.email,
+          amount: paymentData.amount,
+          currency: paymentData.currency,
+          ref: paymentData.reference,
+          metadata: paymentData.metadata,
+          callback: function (response: PaystackResponse) {
+            setIsLoading(false);
+            console.log("Payment successful:", response);
+            if (onSuccess) {
+              onSuccess(response);
+            }
+          },
+          onClose: function () {
+            setIsLoading(false);
+            console.log("Payment popup closed");
+            if (onClose) {
+              onClose();
+            }
+          },
+        });
 
-    handler.openIframe();
+        // Open the payment modal immediately
+        handler.openIframe();
+      } catch (error) {
+        console.error("Error initializing Paystack payment:", error);
+        setIsLoading(false);
+      }
+    }, 100);
   };
 
   const generateReference = () => {
@@ -99,6 +151,7 @@ export const usePaystack = ({ onSuccess, onClose }: UsePaystackProps = {}) => {
     generateReference,
     verifyPayment,
     isLoading,
+    isPaystackReady,
   };
 };
 

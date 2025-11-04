@@ -10,11 +10,13 @@ const defaultCategoryImages: Record<string, string> = {
   "Displays & Boards":
     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7P0vA1HVksNiRx1_H9NjfcinzleHNX_KUaQ&s",
   "POS & Electronics":
-    "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxAPEhUSEBMVFhIVFRcYFhgSFxIXGxcSFRIXFhgVFhMaHCghGiYmHRUVITEkMSkrLi4uGh8/ODMtOCgtLisBCgoKDg0OGxAQGzAmHyUtLTUtLzctLS0uKy8tLS8vLjUtLy8rLzU3MC0vNS0tKy8tMCs1LzUtLS0tLS0tLS8tLf/...",
+    "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop&crop=center",
+  "POS & Electronics ": // Note the trailing space to match database
+    "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop&crop=center",
   "Baskets & Accessories":
     "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxAQDhAQERASFRUXEBYVFRcQEBYVFRYWFhYWGhYWFhgZHyggGBolHRUYITUhJSkrMzouGB8zODMtNygtMSsBCgoKDg0OGxAQGy0lICUtLy8wKy0wLi0tLystLS0yLSstLi0tLS8tLS0tLy0tLSstLS0tLy0tLS0tLS8tLS0tL//...",
   "Starter Kits & New Arrivals":
-    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAA8FBMVEX///8AIz/m5ubl5eXk5OT/EDf4+Pjn5+fx8fHu7u7v7+/19fX7+/vr6+sAJD/z8/MAFjegoKEAAC60tLQAHzx0fIcMKEIAACYoOlC3u8Slpaa/v78AEDStra65ubm7GDqkGjsaIj5mHz3Kysra29tDID4AACEAACk4RFeRlZzW2t3R0tIAGjp1HTwAAACampuFi5UAAB5rdIHrEjiOHDxSW2qCHTybGzvNFjk5IT6xGTr1ETcAABaoq7EAADAvIT5UID3bFDhaYm9FT18dL0ZfHz3FFzrXFTl7HTwYIj+TGzt8g41VXmwAABNuHj1MID2NKquGAAAgAElEQVR4nOVdDVvbxtKVJUUfloTANjFgG5LYtTF2Ez5CQkhpEiA0DWny/...",
+    "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&h=300&fit=crop&crop=center",
   default: "/placeholder-category.jpg",
 };
 

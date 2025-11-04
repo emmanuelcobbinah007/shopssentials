@@ -56,7 +56,12 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     });
   }, [user]);
 
-  const { initializePayment, generateReference, verifyPayment } = usePaystack({
+  const {
+    initializePayment,
+    generateReference,
+    verifyPayment,
+    isPaystackReady,
+  } = usePaystack({
     onSuccess: async (response) => {
       try {
         setIsProcessing(true);
@@ -293,177 +298,194 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
             </div>
           </div>
 
-          {/* Shipping Information */}
-          <div className="mb-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Shipping Information
-            </h3>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    name="firstName"
-                    value={shippingInfo.firstName}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={shippingInfo.lastName}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={shippingInfo.email}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={shippingInfo.phone}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address
-                </label>
-                <textarea
-                  name="address"
-                  value={shippingInfo.address}
-                  onChange={handleInputChange}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
-                  placeholder="Street address, apartment, etc."
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    City
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={shippingInfo.city}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Region
-                  </label>
-                  <input
-                    type="text"
-                    name="region"
-                    value={shippingInfo.region}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Postal Code
-                </label>
-                <input
-                  type="text"
-                  name="postalCode"
-                  value={shippingInfo.postalCode}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Payment Section */}
-          <div className="mb-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Payment Information
-            </h3>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-center">
-                <svg
-                  className="w-5 h-5 text-blue-600 mr-2"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <div>
-                  <p className="text-sm text-blue-800 font-medium">
-                    Secure Payment with Paystack
-                  </p>
-                  <p className="text-xs text-blue-600">
-                    Your payment information is encrypted and secure.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Checkout Button */}
-          <button
-            onClick={handleCheckout}
-            disabled={isProcessing || items.length === 0}
-            className={`w-full py-3 rounded-lg font-semibold transition-colors ${
-              isProcessing || items.length === 0
-                ? "bg-gray-400 text-gray-600 cursor-not-allowed"
-                : "bg-[#3474c0] text-white hover:bg-[#2a5a9e]"
-            }`}
+          {/* Checkout Form */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleCheckout();
+            }}
           >
-            {isProcessing ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                Processing...
+            {/* Shipping Information */}
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Shipping Information
+              </h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      First Name
+                    </label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      value={shippingInfo.firstName}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={shippingInfo.lastName}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={shippingInfo.email}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={shippingInfo.phone}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Address
+                  </label>
+                  <textarea
+                    name="address"
+                    value={shippingInfo.address}
+                    onChange={handleInputChange}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
+                    placeholder="Street address, apartment, etc."
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      name="city"
+                      value={shippingInfo.city}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Region
+                    </label>
+                    <input
+                      type="text"
+                      name="region"
+                      value={shippingInfo.region}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Postal Code
+                  </label>
+                  <input
+                    type="text"
+                    name="postalCode"
+                    value={shippingInfo.postalCode}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
+                  />
+                </div>
               </div>
-            ) : (
-              `Pay Now - ${formatPrice(total)}`
-            )}
-          </button>
+            </div>
+
+            {/* Payment Section */}
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Payment Information
+              </h3>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center">
+                  <svg
+                    className="w-5 h-5 text-blue-600 mr-2"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <div>
+                    <p className="text-sm text-blue-800 font-medium">
+                      Secure Payment with Paystack
+                    </p>
+                    <p className="text-xs text-blue-600">
+                      Your payment information is encrypted and secure.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Checkout Button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                handleCheckout();
+              }}
+              disabled={isProcessing || items.length === 0 || !isPaystackReady}
+              className={`w-full py-3 rounded-lg font-semibold transition-colors ${
+                isProcessing || items.length === 0 || !isPaystackReady
+                  ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                  : "bg-[#3474c0] text-white hover:bg-[#2a5a9e]"
+              }`}
+            >
+              {isProcessing ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Processing...
+                </div>
+              ) : !isPaystackReady ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600 mr-2"></div>
+                  Loading Payment System...
+                </div>
+              ) : (
+                `Pay Now - ${formatPrice(total)}`
+              )}
+            </button>
+          </form>
 
           <button
             onClick={handleClose}
