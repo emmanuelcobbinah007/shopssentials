@@ -6,6 +6,7 @@ import SignInForm from "./SignInForm";
 import SignUpForm from "./SignUpForm";
 import UserProfile from "./UserProfile";
 import ForgotPasswordForm from "./ForgotPasswordForm";
+import MyOrders from "./MyOrders";
 import { useAuth } from "@/app/contexts/AuthContext";
 
 interface UserModalProps {
@@ -13,7 +14,12 @@ interface UserModalProps {
   animateModal: boolean;
 }
 
-type ModalState = "signin" | "signup" | "profile" | "forgotpassword";
+type ModalState =
+  | "signin"
+  | "signup"
+  | "profile"
+  | "forgotpassword"
+  | "myorders";
 
 const UserModal: React.FC<UserModalProps> = ({ handleClose, animateModal }) => {
   const { isAuthenticated, login, logout, isLoading } = useAuth();
@@ -50,13 +56,25 @@ const UserModal: React.FC<UserModalProps> = ({ handleClose, animateModal }) => {
   };
 
   const handleSignupSubmit = async (data: {
-    name: string;
+    firstname: string;
+    lastname: string;
     email: string;
+    phone: string;
     password: string;
     confirmPassword: string;
   }) => {
     try {
-      await axios.post("/api/auth/signup", data);
+      const signupData = {
+        firstname: data.firstname,
+        lastname: data.lastname,
+        email: data.email,
+        phone: data.phone,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+        storefront: "SHOPSSENTIALS",
+      };
+
+      await axios.post("/api/auth/signup", signupData);
 
       toast.success("Account created successfully! Please sign in.");
       changeState("signin");
@@ -99,6 +117,8 @@ const UserModal: React.FC<UserModalProps> = ({ handleClose, animateModal }) => {
         return "Your Profile";
       case "forgotpassword":
         return "Reset Password";
+      case "myorders":
+        return "My Orders";
       default:
         return "Account";
     }
@@ -126,7 +146,13 @@ const UserModal: React.FC<UserModalProps> = ({ handleClose, animateModal }) => {
           <div className="flex items-center gap-3">
             {currentState !== "signin" && currentState !== "profile" && (
               <button
-                onClick={() => changeState("signin")}
+                onClick={() => {
+                  if (currentState === "myorders") {
+                    changeState("profile");
+                  } else {
+                    changeState("signin");
+                  }
+                }}
                 className="p-1 rounded-full hover:bg-gray-200 transition duration-200"
               >
                 <ArrowLeft size={20} color="#3474c0" />
@@ -164,7 +190,13 @@ const UserModal: React.FC<UserModalProps> = ({ handleClose, animateModal }) => {
             />
           )}
           {currentState === "profile" && (
-            <UserProfile onSignOut={handleSignOut} />
+            <UserProfile
+              onSignOut={handleSignOut}
+              onMyOrders={() => changeState("myorders")}
+            />
+          )}
+          {currentState === "myorders" && (
+            <MyOrders onBack={() => changeState("profile")} />
           )}
           {currentState === "forgotpassword" && (
             <ForgotPasswordForm

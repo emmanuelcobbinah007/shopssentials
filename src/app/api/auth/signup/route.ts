@@ -6,10 +6,34 @@ const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, password, confirmPassword } = await request.json();
+    const {
+      firstname,
+      lastname,
+      email,
+      phone,
+      password,
+      confirmPassword,
+      storefront = "SHOPSSENTIALS",
+    } = await request.json();
 
     // Validate input
-    if (!name || !email || !password || !confirmPassword) {
+    if (
+      !firstname ||
+      !lastname ||
+      !email ||
+      !phone ||
+      !password ||
+      !confirmPassword
+    ) {
+      console.log("Validation failed: Missing fields", {
+        firstname,
+        lastname,
+        email,
+        phone,
+        password: password ? "provided" : "missing",
+        confirmPassword: confirmPassword ? "provided" : "missing",
+      });
+
       return NextResponse.json(
         { error: "All fields are required" },
         { status: 400 }
@@ -23,30 +47,34 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user exists
+    // Validate phone format
+    const phoneRegex = /^\+\d{10,15}$/;
+    if (!phoneRegex.test(phone)) {
+      return NextResponse.json(
+        { error: "Invalid phone number format. Use +233XXXXXXXXX" },
+        { status: 400 }
+      );
+    }
+
+    // Check if user exists with email
     const existingUser = await prisma.user.findUnique({
       where: {
         email_storefront: {
           email,
-          storefront: "SHOPSSENTIALS",
+          storefront,
         },
       },
     });
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "User already exists" },
-        { status: 400 }
+        { error: "User already exists with this email" },
+        { status: 409 }
       );
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Split name into firstname and lastname
-    const nameParts = name.trim().split(" ");
-    const firstname = nameParts[0] || "";
-    const lastname = nameParts.slice(1).join(" ") || "";
 
     // Create user
     const user = await prisma.user.create({
@@ -54,9 +82,9 @@ export async function POST(request: NextRequest) {
         firstname,
         lastname,
         email,
+        phone,
         password: hashedPassword,
-        storefront: "SHOPSSENTIALS",
-        phone: "", // Required field, set to empty for now
+        storefront,
       },
     });
 
@@ -68,6 +96,7 @@ export async function POST(request: NextRequest) {
           email: user.email,
           firstname: user.firstname,
           lastname: user.lastname,
+          phone: user.phone,
         },
       },
       { status: 201 }

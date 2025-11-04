@@ -1,13 +1,15 @@
 import React, { useState } from "react";
-import { Eye, EyeSlash, User, Message, Lock } from "iconsax-reactjs";
+import { Eye, EyeSlash, User, Message, Lock, Call } from "iconsax-reactjs";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
 interface SignUpFormProps {
   onSwitchToSignin: () => void;
   onSubmit: (data: {
-    name: string;
+    firstname: string;
+    lastname: string;
     email: string;
+    phone: string;
     password: string;
     confirmPassword: string;
   }) => void;
@@ -21,12 +23,21 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validationSchema = Yup.object({
-    name: Yup.string()
-      .min(2, "Name must be at least 2 characters")
-      .required("Full name is required"),
+    firstname: Yup.string()
+      .min(2, "First name must be at least 2 characters")
+      .required("First name is required"),
+    lastname: Yup.string()
+      .min(2, "Last name must be at least 2 characters")
+      .required("Last name is required"),
     email: Yup.string()
       .email("Invalid email address")
       .required("Email is required"),
+    phone: Yup.string()
+      .required("Phone number is required")
+      .matches(
+        /^\+\d{10,15}$/,
+        "Invalid phone number format (use +233XXXXXXXXX)"
+      ),
     password: Yup.string()
       .min(8, "Password must be at least 8 characters")
       .matches(
@@ -40,8 +51,10 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
   });
 
   const initialValues = {
-    name: "",
+    firstname: "",
+    lastname: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
   };
@@ -54,33 +67,59 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
     >
       {({ isSubmitting }) => (
         <Form className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Full Name
-            </label>
-            <div className="relative">
-              <User
-                size={20}
-                color="#9CA3AF"
-                className="absolute left-3 top-1/2 transform -translate-y-1/2"
-              />
-              <Field
-                type="text"
-                name="name"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
-                placeholder="Enter your full name"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                First Name <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <User
+                  size={20}
+                  color="#9CA3AF"
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2"
+                />
+                <Field
+                  type="text"
+                  name="firstname"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
+                  placeholder="First name"
+                />
+              </div>
+              <ErrorMessage
+                name="firstname"
+                component="div"
+                className="text-red-500 text-sm mt-1"
               />
             </div>
-            <ErrorMessage
-              name="name"
-              component="div"
-              className="text-red-500 text-sm mt-1"
-            />
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Last Name <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <User
+                  size={20}
+                  color="#9CA3AF"
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2"
+                />
+                <Field
+                  type="text"
+                  name="lastname"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
+                  placeholder="Last name"
+                />
+              </div>
+              <ErrorMessage
+                name="lastname"
+                component="div"
+                className="text-red-500 text-sm mt-1"
+              />
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
+              Email Address <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <Message
@@ -97,6 +136,33 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
             </div>
             <ErrorMessage
               name="email"
+              component="div"
+              className="text-red-500 text-sm mt-1"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Phone Number <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <Call
+                size={20}
+                color="#9CA3AF"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2"
+              />
+              <Field
+                type="tel"
+                name="phone"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent"
+                placeholder="+233XXXXXXXXX"
+              />
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              Please include country code (e.g., +233 for Ghana)
+            </div>
+            <ErrorMessage
+              name="phone"
               component="div"
               className="text-red-500 text-sm mt-1"
             />
