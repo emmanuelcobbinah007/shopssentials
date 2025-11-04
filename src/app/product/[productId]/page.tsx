@@ -187,8 +187,7 @@ function RelatedProducts({ currentProductId }: { currentProductId: string }) {
 }
 
 // Client component for product display with image gallery
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function ProductDisplay({ product }: { product: any }) {
+function ProductDisplay({ product }: { product: Product }) {
   const [selectedImageIndex, setSelectedImageIndex] = React.useState(0);
   const [mainImageLoading, setMainImageLoading] = React.useState(true);
   const [thumbnailLoading, setThumbnailLoading] = React.useState(true);
@@ -290,10 +289,10 @@ function ProductDisplay({ product }: { product: any }) {
 
       // Add current product to cart for checkout modal
       const cartProduct = {
-        id: product.id,
+        id: parseInt(product.id),
         name: product.name,
         price: product.price,
-        image: product.images?.[0]?.url || product.image,
+        image: product.images?.[0] || product.image,
         category: product.categoryName || product.category,
       };
 
@@ -339,10 +338,10 @@ function ProductDisplay({ product }: { product: any }) {
     try {
       // Transform product data to match CartContext Product interface
       const cartProduct = {
-        id: product.id,
+        id: parseInt(product.id),
         name: product.name,
         price: product.price,
-        image: product.images?.[0]?.url || product.image,
+        image: product.images?.[0] || product.image,
         category: product.categoryName || product.category,
       };
 

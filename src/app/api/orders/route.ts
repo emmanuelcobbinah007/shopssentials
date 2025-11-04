@@ -3,6 +3,33 @@ import { PrismaClient, Prisma } from "@/generated/prisma";
 
 const prisma = new PrismaClient();
 
+// Types for the API responses
+interface OrderItemWithProduct {
+  id: string;
+  quantity: number;
+  size: string | null;
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    images: { url: string }[];
+    category: { name: string };
+  };
+}
+
+interface OrderWithItems {
+  id: string;
+  isCompleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  orderItems: OrderItemWithProduct[];
+}
+
+interface OrderWithTotals extends OrderWithItems {
+  total: number;
+  itemCount: number;
+}
+
 // Create a new order
 export async function POST(request: NextRequest) {
   try {
@@ -145,17 +172,20 @@ export async function GET(request: NextRequest) {
     });
 
     // Transform the orders to include calculated totals
-    const ordersWithTotals = orders.map((order: any) => ({
-      ...order,
-      total: order.orderItems.reduce(
-        (sum: number, item: any) => sum + item.product.price * item.quantity,
-        0
-      ),
-      itemCount: order.orderItems.reduce(
-        (sum: number, item: any) => sum + item.quantity,
-        0
-      ),
-    }));
+    const ordersWithTotals: OrderWithTotals[] = orders.map(
+      (order: OrderWithItems) => ({
+        ...order,
+        total: order.orderItems.reduce(
+          (sum: number, item: OrderItemWithProduct) =>
+            sum + item.product.price * item.quantity,
+          0
+        ),
+        itemCount: order.orderItems.reduce(
+          (sum: number, item: OrderItemWithProduct) => sum + item.quantity,
+          0
+        ),
+      })
+    );
 
     return NextResponse.json({
       success: true,

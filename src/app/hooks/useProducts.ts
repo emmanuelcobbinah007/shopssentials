@@ -7,14 +7,21 @@ export interface Product {
   price: string;
   originalPrice?: string;
   image: string;
+  images?: string[];
   description: string;
+  shortDescription?: string;
   category: string;
+  categoryName?: string;
+  subCategoryName?: string;
   rating: number;
   reviews: number;
   inStock: boolean;
   isOnSale: boolean;
   categoryId: string;
   subCategoryId?: string;
+  stock?: number;
+  salePercent?: number;
+  features?: string[];
 }
 
 export interface Category {
