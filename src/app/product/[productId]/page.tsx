@@ -6,7 +6,10 @@ import Link from "next/link";
 import axios from "axios";
 import { useProduct, Product } from "../../hooks/useProducts";
 import { useCart } from "../../contexts/CartContext";
+import { useAuth } from "../../contexts/AuthContext";
+import { usePaystack, toKobo } from "../../hooks/usePaystack";
 import { toast } from "react-toastify";
+import CheckoutModal from "../../components/ui/landing/Modal/CheckoutModal";
 
 interface ProductPageProps {
   params: Promise<{
@@ -190,11 +193,126 @@ function ProductDisplay({ product }: { product: any }) {
   const [mainImageLoading, setMainImageLoading] = React.useState(true);
   const [thumbnailLoading, setThumbnailLoading] = React.useState(true);
   const [selectedQuantity, setSelectedQuantity] = React.useState(1);
-  const { addToCart, isLoading: cartLoading } = useCart();
+  const [showCheckoutModal, setShowCheckoutModal] = React.useState(false);
+  const [animateModal, setAnimateModal] = React.useState(false);
+  const [isProcessing, setIsProcessing] = React.useState(false);
+
+  const { addToCart, isLoading: cartLoading, clearCart } = useCart();
+  const { user } = useAuth();
+
   const images =
     product.images && product.images.length > 0
       ? product.images
       : [product.image];
+
+  // Buy Now functionality with Paystack
+  const { initializePayment, generateReference, verifyPayment } = usePaystack({
+    onSuccess: async (response) => {
+      try {
+        setIsProcessing(true);
+
+        // Verify payment with Paystack
+        const verification = await verifyPayment(response.reference);
+
+        if (verification.success) {
+          // Create order after successful payment
+          await createDirectOrder(
+            response.reference,
+            verification.data.amount / 100
+          );
+
+          toast.success("Payment successful! Your order has been created.");
+          handleCloseCheckoutModal();
+        } else {
+          toast.error("Payment verification failed. Please contact support.");
+        }
+      } catch (error) {
+        console.error("Error processing payment:", error);
+        toast.error("Error processing payment. Please try again.");
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    onClose: () => {
+      if (!isProcessing) {
+        toast.info("Payment cancelled.");
+      }
+    },
+  });
+
+  // Function to create order for direct purchase
+  const createDirectOrder = async (
+    paymentReference: string,
+    paidAmount: number
+  ) => {
+    try {
+      const orderItems = [
+        {
+          productId: product.id.toString(),
+          quantity: selectedQuantity,
+        },
+      ];
+
+      const response = await axios.post("/api/orders", {
+        userId: user?.id,
+        items: orderItems,
+        paymentReference,
+        totalAmount: paidAmount,
+        storefront: "SHOPSSENTIALS",
+      });
+
+      if (response.data.success) {
+        return response.data.order;
+      } else {
+        throw new Error("Failed to create order");
+      }
+    } catch (error) {
+      console.error("Error creating order:", error);
+      throw error;
+    }
+  };
+
+  // Handle Buy Now click
+  const handleBuyNow = async () => {
+    if (!user) {
+      toast.error("Please log in to make a purchase");
+      return;
+    }
+
+    if (!product.inStock) {
+      toast.error("Product is out of stock");
+      return;
+    }
+
+    try {
+      // Clear cart and add this single item for checkout
+      clearCart();
+
+      // Add current product to cart for checkout modal
+      const cartProduct = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.images?.[0]?.url || product.image,
+        category: product.categoryName || product.category,
+      };
+
+      await addToCart(cartProduct, selectedQuantity);
+
+      // Open checkout modal
+      setShowCheckoutModal(true);
+      setTimeout(() => setAnimateModal(true), 50);
+    } catch (error) {
+      console.error("Error initiating purchase:", error);
+      toast.error("Error initiating purchase. Please try again.");
+    }
+  };
+
+  // Handle closing checkout modal
+  const handleCloseCheckoutModal = () => {
+    setAnimateModal(false);
+    setTimeout(() => setShowCheckoutModal(false), 300);
+  };
 
   const renderStars = (rating: number) => {
     return (
@@ -406,14 +524,24 @@ function ProductDisplay({ product }: { product: any }) {
                 {/* Action Buttons */}
                 <div className="flex gap-4">
                   <button
+                    onClick={handleBuyNow}
+                    disabled={!product.inStock || isProcessing}
                     className={`flex-1 py-3 px-6 rounded-lg font-semibold transition-colors ${
-                      product.inStock
+                      product.inStock && !isProcessing
                         ? "bg-[#3474c0] hover:bg-[#4f8bd6] text-white"
                         : "bg-gray-300 text-gray-500 cursor-not-allowed"
                     }`}
-                    disabled={!product.inStock}
                   >
-                    {product.inStock ? "Buy Now" : "Out of Stock"}
+                    {isProcessing ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                        Processing...
+                      </div>
+                    ) : !product.inStock ? (
+                      "Out of Stock"
+                    ) : (
+                      "Buy Now"
+                    )}
                   </button>
                   <button
                     onClick={handleAddToCart}
@@ -460,6 +588,14 @@ function ProductDisplay({ product }: { product: any }) {
           </div>
         </div>
       </div>
+
+      {/* Checkout Modal */}
+      {showCheckoutModal && (
+        <CheckoutModal
+          handleClose={handleCloseCheckoutModal}
+          animateModal={animateModal}
+        />
+      )}
     </div>
   );
 }

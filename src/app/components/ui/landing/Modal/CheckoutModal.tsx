@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import { CloseCircle } from "iconsax-reactjs";
 import { useCart } from "@/app/contexts/CartContext";
 import { useAuth } from "@/app/contexts/AuthContext";
+import { usePaystack, toKobo } from "@/app/hooks/usePaystack";
+import { toast } from "react-toastify";
 import Image from "next/image";
+import axios from "axios";
 
 interface CheckoutModalProps {
   handleClose: () => void;
@@ -14,7 +17,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   animateModal,
 }) => {
   const { user } = useAuth();
-  const { items, total, itemCount } = useCart();
+  const { items, total, itemCount, clearCart } = useCart();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const [shippingInfo, setShippingInfo] = useState({
     firstName: user?.firstname || "",
@@ -27,6 +31,147 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     postalCode: "",
   });
 
+  const { initializePayment, generateReference, verifyPayment } = usePaystack({
+    onSuccess: async (response) => {
+      try {
+        setIsProcessing(true);
+
+        // Verify payment with Paystack
+        const verification = await verifyPayment(response.reference);
+
+        if (verification.success) {
+          // Create order after successful payment
+          await createOrder(response.reference, verification.data.amount / 100);
+
+          toast.success("Payment successful! Your order has been created.");
+          clearCart(); // Clear cart after successful order
+          handleClose();
+        } else {
+          toast.error("Payment verification failed. Please contact support.");
+        }
+      } catch (error) {
+        console.error("Error processing payment:", error);
+        toast.error("Error processing payment. Please try again.");
+      } finally {
+        setIsProcessing(false);
+      }
+    },
+    onClose: () => {
+      if (!isProcessing) {
+        toast.info("Payment cancelled.");
+      }
+    },
+  });
+
+  // Function to create order after successful payment
+  const createOrder = async (paymentReference: string, paidAmount: number) => {
+    try {
+      const orderItems = items.map((item) => ({
+        productId: item.product.id.toString(),
+        quantity: item.quantity,
+      }));
+
+      const response = await axios.post("/api/orders", {
+        userId: user?.id,
+        items: orderItems,
+        shippingInfo,
+        paymentReference,
+        totalAmount: paidAmount,
+        storefront: "SHOPSSENTIALS",
+      });
+
+      if (response.data.success) {
+        return response.data.order;
+      } else {
+        throw new Error("Failed to create order");
+      }
+    } catch (error) {
+      console.error("Error creating order:", error);
+      throw error;
+    }
+  };
+
+  // Validate form before proceeding with payment
+  const validateForm = () => {
+    const requiredFields = [
+      "firstName",
+      "lastName",
+      "email",
+      "phone",
+      "address",
+      "city",
+      "region",
+    ];
+
+    for (const field of requiredFields) {
+      if (!shippingInfo[field as keyof typeof shippingInfo]) {
+        toast.error(
+          `Please fill in ${field.replace(/([A-Z])/g, " $1").toLowerCase()}`
+        );
+        return false;
+      }
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(shippingInfo.email)) {
+      toast.error("Please enter a valid email address");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleCheckout = async () => {
+    if (!user) {
+      toast.error("Please log in to complete your order");
+      return;
+    }
+
+    if (items.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      const reference = generateReference();
+      const amountInKobo = toKobo(total);
+
+      initializePayment({
+        email: shippingInfo.email,
+        amount: amountInKobo,
+        currency: "GHS",
+        reference,
+        metadata: {
+          custom_fields: [
+            {
+              display_name: "Customer Name",
+              variable_name: "customer_name",
+              value: `${shippingInfo.firstName} ${shippingInfo.lastName}`,
+            },
+            {
+              display_name: "Phone",
+              variable_name: "phone",
+              value: shippingInfo.phone,
+            },
+            {
+              display_name: "Order Items",
+              variable_name: "order_items",
+              value: `${itemCount} items`,
+            },
+          ],
+        },
+      });
+    } catch (error) {
+      console.error("Error initializing payment:", error);
+      toast.error("Error initializing payment. Please try again.");
+    }
+  };
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -35,13 +180,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
       ...prev,
       [name]: value,
     }));
-  };
-
-  const handleCheckout = async () => {
-    // For now, just show an alert that Paystack integration will be added later
-    alert(
-      "Paystack integration will be implemented here. Order would be created from cart items."
-    );
   };
 
   const formatPrice = (price: string | number) => {
@@ -252,28 +390,32 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
             </div>
           </div>
 
-          {/* Payment Section Placeholder */}
+          {/* Payment Section */}
           <div className="mb-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
               Payment Information
             </h3>
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-center">
                 <svg
-                  className="w-5 h-5 text-yellow-600 mr-2"
+                  className="w-5 h-5 text-blue-600 mr-2"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
                   <path
                     fillRule="evenodd"
-                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                     clipRule="evenodd"
                   />
                 </svg>
-                <p className="text-sm text-yellow-800">
-                  Paystack integration will be implemented here for secure
-                  payment processing.
-                </p>
+                <div>
+                  <p className="text-sm text-blue-800 font-medium">
+                    Secure Payment with Paystack
+                  </p>
+                  <p className="text-xs text-blue-600">
+                    Your payment information is encrypted and secure.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -281,9 +423,21 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
           {/* Checkout Button */}
           <button
             onClick={handleCheckout}
-            className="w-full bg-[#3474c0] text-white py-3 rounded-lg font-semibold hover:bg-[#2a5a9e] transition-colors"
+            disabled={isProcessing || items.length === 0}
+            className={`w-full py-3 rounded-lg font-semibold transition-colors ${
+              isProcessing || items.length === 0
+                ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                : "bg-[#3474c0] text-white hover:bg-[#2a5a9e]"
+            }`}
           >
-            Complete Order - {formatPrice(total)}
+            {isProcessing ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                Processing...
+              </div>
+            ) : (
+              `Pay Now - ${formatPrice(total)}`
+            )}
           </button>
 
           <button
