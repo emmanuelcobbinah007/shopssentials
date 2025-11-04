@@ -1,12 +1,20 @@
 "use client";
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useCallback } from "react";
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   price: string;
+  originalPrice?: string;
   image: string;
+  description: string;
   category: string;
+  rating: number;
+  reviews: number;
+  inStock: boolean;
+  isOnSale: boolean;
+  categoryId: string;
+  subCategoryId?: string;
 }
 
 interface SearchState {
@@ -25,6 +33,7 @@ interface SearchContextType extends SearchState {
   setSearchPosition: (position: "hero" | "top") => void;
   activateSearch: () => void;
   deactivateSearch: () => void;
+  searchProducts: (query: string) => Promise<void>;
 }
 
 const SearchContext = createContext<SearchContextType | undefined>(undefined);
@@ -50,6 +59,33 @@ export const SearchProvider: React.FC<{ children: ReactNode }> = ({
     setSearchResults([]);
   };
 
+  const searchProducts = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `/api/products?search=${encodeURIComponent(query)}&limit=10`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to search products");
+      }
+
+      const data = await response.json();
+      setSearchResults(data.products || []);
+    } catch (error) {
+      console.error("Search error:", error);
+      setSearchResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   const value: SearchContextType = {
     isSearchActive,
     searchQuery,
@@ -63,6 +99,7 @@ export const SearchProvider: React.FC<{ children: ReactNode }> = ({
     setSearchPosition,
     activateSearch,
     deactivateSearch,
+    searchProducts,
   };
 
   return (

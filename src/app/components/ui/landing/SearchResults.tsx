@@ -4,74 +4,13 @@ import { useSearch } from "../../../contexts/SearchContext";
 import Image from "next/image";
 import Link from "next/link";
 
-// Mock products data - should match shop page data
-const mockProducts = [
-  {
-    id: 1,
-    name: "Professional Shelving Unit",
-    price: "GHS299",
-    image: "/images/product1.jpeg",
-    category: "shelving",
-  },
-  {
-    id: 2,
-    name: "Retail Display Stand",
-    price: "GHS159",
-    image: "/images/product2.jpg",
-    category: "displays",
-  },
-  {
-    id: 3,
-    name: "POS System Bundle",
-    price: "GHS449",
-    image: "/images/product3.jpg",
-    category: "pos",
-  },
-  {
-    id: 4,
-    name: "Shopping Baskets Set",
-    price: "GHS89",
-    image: "/images/product4.jpg",
-    category: "accessories",
-  },
-  {
-    id: 5,
-    name: "Price Tag Gun",
-    price: "GHS45",
-    image: "/images/product1.jpg",
-    category: "accessories",
-  },
-  {
-    id: 6,
-    name: "Peg Board Display",
-    price: "GHS120",
-    image: "/images/product2.jpg",
-    category: "displays",
-  },
-  {
-    id: 7,
-    name: "Cash Register",
-    price: "GHS199",
-    image: "/images/product3.jpg",
-    category: "pos",
-  },
-  {
-    id: 8,
-    name: "Storage Rack System",
-    price: "GHS399",
-    image: "/images/product1.jpeg",
-    category: "shelving",
-  },
-];
-
 const SearchResults: React.FC = () => {
   const {
     isSearchActive,
     searchQuery,
     searchResults,
     isLoading,
-    setSearchResults,
-    setIsLoading,
+    searchProducts,
     deactivateSearch,
   } = useSearch();
 
@@ -80,26 +19,20 @@ const SearchResults: React.FC = () => {
   // mounted keeps the component in the DOM while the exit animation runs
   const [mounted, setMounted] = useState(false);
 
-  // Mock search with debounce
+  // Real search with debounce
   useEffect(() => {
     if (searchQuery && isSearchActive) {
-      setIsLoading(true);
       const timeoutId = setTimeout(() => {
-        const filtered = mockProducts.filter(
-          (product) =>
-            product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            product.category.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setSearchResults(filtered);
-        setIsLoading(false);
+        searchProducts(searchQuery);
       }, 300);
       return () => clearTimeout(timeoutId);
     }
 
     if (!searchQuery) {
-      setSearchResults([]);
+      // Clear results when query is empty, but don't set loading
+      searchProducts("");
     }
-  }, [searchQuery, isSearchActive, setSearchResults, setIsLoading]);
+  }, [searchQuery, isSearchActive]);
 
   useEffect(() => {
     let t: ReturnType<typeof setTimeout> | undefined;
@@ -193,12 +126,32 @@ const SearchResults: React.FC = () => {
                     <h4 className="font-medium text-[#1A1D23] text-sm">
                       {product.name}
                     </h4>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {product.category}
+                    <p className="text-xs text-gray-500 mt-1 truncate">
+                      {product.description}
                     </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-gray-400 capitalize">
+                        {product.category.replace("-", " ")}
+                      </span>
+                      {!product.inStock && (
+                        <span className="text-xs text-red-500">
+                          Out of Stock
+                        </span>
+                      )}
+                      {product.isOnSale && (
+                        <span className="text-xs text-green-600">On Sale</span>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-[#3474c0] font-semibold text-sm">
-                    {product.price}
+                  <div className="text-right">
+                    <div className="text-[#3474c0] font-semibold text-sm">
+                      {product.price}
+                    </div>
+                    {product.originalPrice && (
+                      <div className="text-xs text-gray-400 line-through">
+                        {product.originalPrice}
+                      </div>
+                    )}
                   </div>
                 </div>
               </Link>
@@ -210,12 +163,20 @@ const SearchResults: React.FC = () => {
         {searchQuery && (
           <div className="p-4 bg-gray-50 border-t border-gray-100">
             <div className="flex gap-2 flex-wrap">
-              <button className="px-3 py-1 bg-[#3474c0] text-white text-xs rounded-full hover:bg-[#4f8bd6] transition-colors">
+              <Link
+                href={`/shop?search=${encodeURIComponent(searchQuery)}`}
+                onClick={deactivateSearch}
+                className="px-3 py-1 bg-[#3474c0] text-white text-xs rounded-full hover:bg-[#4f8bd6] transition-colors"
+              >
                 View All Results
-              </button>
-              <button className="px-3 py-1 bg-white border border-gray-200 text-gray-600 text-xs rounded-full hover:bg-gray-50 transition-colors">
+              </Link>
+              <Link
+                href="/shop"
+                onClick={deactivateSearch}
+                className="px-3 py-1 bg-white border border-gray-200 text-gray-600 text-xs rounded-full hover:bg-gray-50 transition-colors"
+              >
                 Browse Categories
-              </button>
+              </Link>
             </div>
           </div>
         )}
