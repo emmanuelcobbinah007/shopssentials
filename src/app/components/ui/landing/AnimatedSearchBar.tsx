@@ -19,7 +19,6 @@ const AnimatedSearchBar: React.FC<AnimatedSearchBarProps> = ({
     setSearchQuery,
     activateSearch,
     deactivateSearch,
-    searchProducts,
   } = useSearch();
 
   const inputRef = useRef<HTMLInputElement>(null);

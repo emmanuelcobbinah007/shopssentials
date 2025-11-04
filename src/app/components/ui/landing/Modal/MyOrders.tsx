@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/app/contexts/AuthContext";
-import { ShoppingCart, CalendarTick, Box } from "iconsax-reactjs";
+import { ShoppingCart, CalendarTick, Box, ArrowLeft } from "iconsax-reactjs";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Image from "next/image";
@@ -39,13 +39,7 @@ const MyOrders: React.FC<MyOrdersProps> = ({ onBack }) => {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      fetchOrders();
-    }
-  }, [user]);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get(
@@ -61,7 +55,13 @@ const MyOrders: React.FC<MyOrdersProps> = ({ onBack }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user) {
+      fetchOrders();
+    }
+  }, [user, fetchOrders]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -95,6 +95,13 @@ const MyOrders: React.FC<MyOrdersProps> = ({ onBack }) => {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
+          <button
+            onClick={() => setSelectedOrder(null)}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <ArrowLeft size={16} />
+            <span className="text-sm">Back to Orders</span>
+          </button>
           <span className="text-sm text-gray-500">
             Order #{selectedOrder.id.slice(-8)}
           </span>
@@ -176,7 +183,7 @@ const MyOrders: React.FC<MyOrdersProps> = ({ onBack }) => {
             No Orders Yet
           </h3>
           <p className="text-gray-600 mb-4">
-            You haven't placed any orders yet. Start shopping to see your order
+            You haven&apos;t placed any orders yet. Start shopping to see your order
             history here!
           </p>
         </div>

@@ -32,7 +32,7 @@ const SearchResults: React.FC = () => {
       // Clear results when query is empty, but don't set loading
       searchProducts("");
     }
-  }, [searchQuery, isSearchActive]);
+  }, [searchQuery, isSearchActive, searchProducts]);
 
   useEffect(() => {
     let t: ReturnType<typeof setTimeout> | undefined;
