@@ -3,12 +3,15 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import Sidebar from "../components/ui/landing/Sidebar";
 import { useCart } from "../contexts/CartContext";
-import { useProducts, Product } from "../hooks/useProducts";
+import { useProducts, Product, useCategories } from "../hooks/useProducts";
 import { ShoppingBag } from "iconsax-reactjs";
 
 const ShopPage: React.FC = () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [sortBy, setSortBy] = useState<string>("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -22,6 +25,9 @@ const ShopPage: React.FC = () => {
     search: "",
   });
 
+  // Fetch categories to convert category name to ID
+  const { data: categoriesData } = useCategories();
+
   // Use TanStack Query for products
   const { data, isLoading } = useProducts({
     ...currentFilters,
@@ -29,6 +35,47 @@ const ShopPage: React.FC = () => {
   });
 
   const products = data?.products || [];
+
+  // Set initial filter from URL parameters
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get("category");
+    console.log("URL category parameter:", categoryFromUrl);
+    console.log("Categories data:", categoriesData);
+
+    if (categoryFromUrl && categoriesData) {
+      // Convert category name to category ID
+      const category = categoriesData.find(
+        (cat) => cat.name.toLowerCase() === categoryFromUrl.toLowerCase()
+      );
+      console.log("Found category:", category);
+
+      const categoryId = category ? category.id : "all";
+      console.log("Category ID to set:", categoryId);
+
+      setCurrentFilters((prev) => {
+        if (categoryId !== prev.categoryId) {
+          console.log("Setting new category filter:", categoryId);
+          return {
+            ...prev,
+            categoryId: categoryId,
+          };
+        }
+        return prev;
+      });
+    } else if (!categoryFromUrl) {
+      // If no category in URL, reset to "all"
+      setCurrentFilters((prev) => {
+        if (prev.categoryId !== "all") {
+          console.log("Resetting category filter to all");
+          return {
+            ...prev,
+            categoryId: "all",
+          };
+        }
+        return prev;
+      });
+    }
+  }, [searchParams, categoriesData]);
 
   // Handle sidebar animation
   useEffect(() => {
@@ -60,6 +107,20 @@ const ShopPage: React.FC = () => {
   const handleCategoryChange = (categoryId: string) => {
     const newFilters = { ...currentFilters, categoryId };
     setCurrentFilters(newFilters);
+
+    // Update URL parameters to reflect the category change
+    const params = new URLSearchParams();
+    if (categoryId !== "all" && categoriesData) {
+      const category = categoriesData.find((cat) => cat.id === categoryId);
+      if (category) {
+        params.set("category", category.name);
+      }
+    }
+
+    // Update URL without page reload
+    const newUrl = params.toString() ? `/shop?${params.toString()}` : "/shop";
+    router.push(newUrl, { scroll: false });
+
     closeSidebar();
   };
 
@@ -469,6 +530,8 @@ const ShopPage: React.FC = () => {
                     };
                     setCurrentFilters(resetFilters);
                     setSortBy("name");
+                    // Also clear URL parameters
+                    window.history.pushState({}, "", "/shop");
                   }}
                   className="bg-[#3474c0] text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-[#4f8bd6] transition-colors text-sm sm:text-base"
                 >

@@ -38,12 +38,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     // Check if user data exists in localStorage on mount
     const storedUser = localStorage.getItem("user");
-    console.log("AuthContext: storedUser from localStorage:", storedUser);
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        console.log("AuthContext: parsed user:", parsedUser);
-        console.log("AuthContext: user.phone =", parsedUser.phone);
         setUser(parsedUser);
       } catch (error) {
         console.error("Error parsing stored user data:", error);
@@ -54,14 +51,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = (userData: User) => {
-    console.log("AuthContext: login called with userData:", userData);
-    console.log("AuthContext: userData.phone =", userData.phone);
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
-    console.log(
-      "AuthContext: stored in localStorage:",
-      JSON.stringify(userData)
-    );
   };
 
   const logout = () => {
