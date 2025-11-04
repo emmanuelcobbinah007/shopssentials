@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Sidebar from "../components/ui/landing/Sidebar";
@@ -12,6 +12,7 @@ const ShopPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<string>("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const [currentFilters, setCurrentFilters] = useState({
     categoryId: "all",
     subCategoryId: "all",
@@ -29,11 +30,37 @@ const ShopPage: React.FC = () => {
 
   const products = data?.products || [];
 
+  // Handle sidebar animation
+  useEffect(() => {
+    if (isSidebarOpen) {
+      setIsSidebarVisible(true);
+    } else {
+      // Delay hiding to allow exit animation
+      const timer = setTimeout(() => {
+        setIsSidebarVisible(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isSidebarOpen]);
+
+  // Handle opening sidebar with animation
+  const openSidebar = () => {
+    setIsSidebarVisible(true);
+    setTimeout(() => {
+      setIsSidebarOpen(true);
+    }, 10);
+  };
+
+  // Handle closing sidebar with animation
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
+
   // Handle category filtering
   const handleCategoryChange = (categoryId: string) => {
     const newFilters = { ...currentFilters, categoryId };
     setCurrentFilters(newFilters);
-    setIsSidebarOpen(false);
+    closeSidebar();
   };
 
   // Handle other filters
@@ -49,7 +76,7 @@ const ShopPage: React.FC = () => {
       inStock: filters.inStockOnly,
     };
     setCurrentFilters(newFilters);
-    setIsSidebarOpen(false);
+    closeSidebar();
   };
 
   // Handle sorting
@@ -267,13 +294,19 @@ const ShopPage: React.FC = () => {
         </div>
 
         {/* Mobile Sidebar Overlay */}
-        {isSidebarOpen && (
+        {isSidebarVisible && (
           <div className="lg:hidden fixed inset-0 z-50">
             <div
-              className="absolute inset-0 bg-black/50"
-              onClick={() => setIsSidebarOpen(false)}
+              className={`absolute inset-0 backdrop-blur-sm bg-black/20 transition-opacity duration-300 ${
+                isSidebarOpen ? "opacity-100" : "opacity-0"
+              }`}
+              onClick={closeSidebar}
             />
-            <div className="absolute left-0 top-0 h-full">
+            <div
+              className={`absolute left-0 top-0 h-full transform transition-transform duration-300 ease-out ${
+                isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+              }`}
+            >
               <Sidebar
                 onCategoryChange={handleCategoryChange}
                 onFiltersChange={handleFiltersChange}
@@ -300,7 +333,7 @@ const ShopPage: React.FC = () => {
                 {/* Mobile Filter Button */}
                 <div className="lg:hidden">
                   <button
-                    onClick={() => setIsSidebarOpen(true)}
+                    onClick={openSidebar}
                     className="flex items-center gap-2 bg-[#3474c0] text-white px-4 py-2 rounded-lg hover:bg-[#4f8bd6] transition-colors"
                   >
                     <svg
