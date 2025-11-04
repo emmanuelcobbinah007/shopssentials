@@ -6,17 +6,18 @@ const prisma = new PrismaClient();
 // Default category images mapping
 const defaultCategoryImages: Record<string, string> = {
   "Shelving and Stands":
-    "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBw0TEA4NDxEVFhANDQ0NDQ0PDQ8QDw0PFREYGBUVFRUYKCggGBsqGxUVITEiJSkrLi4uFyszODMtNygtLisBCgoKDg0OFQ8PGSsZFRk3Nys3Ky0rKy0tLSsrNysrLTcrNzcrLS0tKysrKysrKysrLSsrKysrKystKysrKysrK//AABEIAOEA4QMBIgACEQEDEQH/xAAcAAEAAgIDAQAAAAAAAAAAAAAABgcEBQIDCAH/xABTEAABAwIDBQUECAQFBQoFAwABAAIDBBEFEiUGBzETIkEVIjlhccEygdHQQmKBkqGxshclYnLwJDODosLhFBUXNFJTY3STstLhJkPT8fIZNUSDk8P/...",
+    "https://e7.pngegg.com/pngimages/900/711/png-clipart-shelf-pallet-racking-furniture-wire-shelving-garage-rack-angle-drawer.png",
   "Displays & Boards":
     "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7P0vA1HVksNiRx1_H9NjfcinzleHNX_KUaQ&s",
   "POS & Electronics":
-    "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop&crop=center",
-  "POS & Electronics ": // Note the trailing space to match database
-    "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop&crop=center",
+    "https://www.citypng.com/public/uploads/preview/hd-realistic-pos-machine-with-credit-card-png-704081695127077wwu2seys0q.png",
+  // Note the trailing space to match database
+  "POS & Electronics ":
+    "https://www.citypng.com/public/uploads/preview/hd-realistic-pos-machine-with-credit-card-png-704081695127077wwu2seys0q.png",
   "Baskets & Accessories":
     "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxAQDhAQERASFRUXEBYVFRcQEBYVFRYWFhYWGhYWFhgZHyggGBolHRUYITUhJSkrMzouGB8zODMtNygtMSsBCgoKDg0OGxAQGy0lICUtLy8wKy0wLi0tLystLS0yLSstLi0tLS8tLS0tLy0tLSstLS0tLy0tLS0tLS8tLS0tL//...",
   "Starter Kits & New Arrivals":
-    "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400&h=300&fit=crop&crop=center",
+    "https://w7.pngwing.com/pngs/414/995/png-transparent-new-arrival-shop-now-sale-label-thumbnail.png",
   default: "/placeholder-category.jpg",
 };
 

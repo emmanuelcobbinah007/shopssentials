@@ -91,8 +91,8 @@ const BestSellers: React.FC = () => {
       <div className="bg-white py-16">
         <div className="w-[80%] mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-[#1A1D23]">
-              Featured Products
+            <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-[#1A1D23]">
+              People's Choice
             </h2>
             <p className="text-gray-500 max-w-xl mx-auto">
               Hand-picked featured products curated for quality and value —
@@ -128,8 +128,8 @@ const BestSellers: React.FC = () => {
       <div className="bg-white py-16">
         <div className="w-[80%] mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-[#1A1D23]">
-              Featured Products
+            <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-[#1A1D23]">
+              People's Choice
             </h2>
             <p className="text-gray-500 max-w-xl mx-auto">
               Hand-picked featured products curated for quality and value —
@@ -174,8 +174,8 @@ const BestSellers: React.FC = () => {
       <div className="bg-white py-16">
         <div className="w-[80%] mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-[#1A1D23]">
-              Featured Products
+            <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-[#1A1D23]">
+              People's Choice
             </h2>
             <p className="text-gray-500 max-w-xl mx-auto">
               Hand-picked featured products curated for quality and value —

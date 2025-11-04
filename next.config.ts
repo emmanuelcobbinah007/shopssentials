@@ -13,7 +13,15 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "images.unsplash.com",
+        hostname: "www.citypng.com",
+      },
+      {
+        protocol: "https",
+        hostname: "w7.pngwing.com",
+      },
+      {
+        protocol: "https",
+        hostname: "w7.pngwing.com",
       },
     ],
   },
