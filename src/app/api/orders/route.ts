@@ -37,9 +37,7 @@ export async function POST(request: NextRequest) {
     const {
       userId,
       items,
-      shippingInfo,
       paymentReference,
-      totalAmount,
       storefront = "SHOPSSENTIALS",
     } = body;
 
@@ -74,7 +72,7 @@ export async function POST(request: NextRequest) {
         });
 
         // Create order items
-        const orderItems = await Promise.all(
+        await Promise.all(
           items.map(
             (item: { productId: string; quantity: number; size?: string }) =>
               tx.orderItem.create({
@@ -152,7 +150,7 @@ export async function GET(request: NextRequest) {
     const orders = await prisma.order.findMany({
       where: {
         userId,
-        storefront: storefront as any,
+        storefront: storefront as "SHOPSSENTIALS",
       },
       include: {
         orderItems: {

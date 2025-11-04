@@ -190,7 +190,18 @@ const MyOrders: React.FC<MyOrdersProps> = ({ onBack }) => {
       ) : (
         <>
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Your Orders</h3>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onBack}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                <ArrowLeft size={16} />
+                <span className="text-sm">Back</span>
+              </button>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Your Orders
+              </h3>
+            </div>
             <span className="text-sm text-gray-600">
               {orders.length} orders
             </span>
