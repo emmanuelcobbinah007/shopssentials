@@ -183,8 +183,8 @@ const MyOrders: React.FC<MyOrdersProps> = ({ onBack }) => {
             No Orders Yet
           </h3>
           <p className="text-gray-600 mb-4">
-            You haven&apos;t placed any orders yet. Start shopping to see your order
-            history here!
+            You haven&apos;t placed any orders yet. Start shopping to see your
+            order history here!
           </p>
         </div>
       ) : (
