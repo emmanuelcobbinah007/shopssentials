@@ -21,6 +21,7 @@ export interface Category {
   id: string;
   name: string;
   count?: number;
+  imageURL?: string;
   subCategories?: SubCategory[];
 }
 

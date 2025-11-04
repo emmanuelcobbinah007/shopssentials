@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import Image from "next/image";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import { useCategories } from "../../../hooks/useCategories";
+import { useCategories } from "../../../hooks/useProducts";
 import Link from "next/link";
 
 // Animation Variants
@@ -30,7 +30,7 @@ const cardVariants = {
 const FeaturedCategories: React.FC = () => {
   const controls = useAnimation();
   const [ref, inView] = useInView({ triggerOnce: false, threshold: 0.1 });
-  const { categories, loading, error } = useCategories();
+  const { data: categories, isLoading, error } = useCategories();
 
   useEffect(() => {
     if (inView) {
@@ -40,7 +40,7 @@ const FeaturedCategories: React.FC = () => {
     }
   }, [controls, inView]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-12">
@@ -93,19 +93,25 @@ const FeaturedCategories: React.FC = () => {
           className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
         >
           <AnimatePresence>
-            {categories.map((category) => (
+            {categories?.map((category) => (
               <Link key={category.id} href={`/shop?category=${category.name}`}>
                 <motion.div
                   variants={cardVariants}
                   exit="exit"
                   className="flex flex-col items-center p-6 bg-[#F9FAFB] rounded-xl shadow hover:shadow-lg hover:scale-105 transition hover:border hover:border-blue-500 duration-300 cursor-pointer"
                 >
-                  <Image
-                    src={category.imageURL}
-                    alt={`${category.name} Icon`}
-                    width={64}
-                    height={64}
-                  />
+                  {category.imageURL ? (
+                    <Image
+                      src={category.imageURL}
+                      alt={`${category.name} Icon`}
+                      width={64}
+                      height={64}
+                    />
+                  ) : (
+                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                      <span className="text-sm text-gray-500">No Image</span>
+                    </div>
+                  )}
                   <h3 className="mt-4 font-medium text-[#1A1D23]">
                     {category.name}
                   </h3>
