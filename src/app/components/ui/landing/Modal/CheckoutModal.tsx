@@ -24,12 +24,37 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     firstName: user?.firstname || "",
     lastName: user?.lastname || "",
     email: user?.email || "",
-    phone: "",
+    phone: user?.phone || "",
     address: "",
     city: "",
     region: "",
     postalCode: "",
   });
+
+  // Keep shippingInfo in sync with authenticated user when it becomes available.
+  React.useEffect(() => {
+    console.log("CheckoutModal: user changed:", user);
+    if (!user) return;
+
+    console.log("CheckoutModal: user.phone =", user.phone);
+    console.log("CheckoutModal: user.phone type =", typeof user.phone);
+    console.log("CheckoutModal: user =", JSON.stringify(user, null, 2));
+
+    setShippingInfo((prev) => {
+      const updated = {
+        firstName: user.firstname || prev.firstName,
+        lastName: user.lastname || prev.lastName,
+        email: user.email || prev.email,
+        phone: user.phone || prev.phone || "",
+        address: prev.address,
+        city: prev.city,
+        region: prev.region,
+        postalCode: prev.postalCode,
+      };
+      console.log("CheckoutModal: updating shippingInfo to:", updated);
+      return updated;
+    });
+  }, [user]);
 
   const { initializePayment, generateReference, verifyPayment } = usePaystack({
     onSuccess: async (response) => {

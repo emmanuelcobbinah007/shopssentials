@@ -45,6 +45,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Return success response (you might want to add JWT token generation here later)
+    console.log("Login API: user from database:", {
+      id: user.id,
+      email: user.email,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      phone: user.phone,
+      role: user.role,
+    });
+
     return NextResponse.json(
       {
         message: "Login successful",
@@ -53,6 +62,7 @@ export async function POST(request: NextRequest) {
           email: user.email,
           firstname: user.firstname,
           lastname: user.lastname,
+          phone: user.phone,
           role: user.role,
         },
       },
