@@ -297,7 +297,7 @@ const ShopPage: React.FC = () => {
         {isSidebarVisible && (
           <div className="lg:hidden fixed inset-0 z-50">
             <div
-              className={`absolute inset-0 backdrop-blur-sm bg-black/20 transition-opacity duration-300 ${
+              className={`absolute inset-0 backdrop-blur-sm bg-[#D5E8FA]/30 transition-opacity duration-300 ${
                 isSidebarOpen ? "opacity-100" : "opacity-0"
               }`}
               onClick={closeSidebar}
