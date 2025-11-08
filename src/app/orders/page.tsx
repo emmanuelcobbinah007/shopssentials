@@ -7,7 +7,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 interface OrderItem {
   id: string;
@@ -68,7 +68,6 @@ const OrdersContent: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewOrderId, setReviewOrderId] = useState<string | null>(null);
 
@@ -103,25 +102,6 @@ const OrdersContent: React.FC = () => {
       router.push(`/product/${productId}`);
     }
   };
-
-  // Check for review parameter in URL - simplified
-  useEffect(() => {
-    const reviewParam = searchParams.get("review");
-    if (reviewParam && isAuthenticated && user && orders && orders.length > 0) {
-      const order = orders.find((o) => o.id === reviewParam);
-      if (order && order.status === "COMPLETED") {
-        setReviewOrderId(reviewParam);
-        setShowReviewModal(true);
-        toast.success("You can now leave a review for your completed order!");
-      } else if (order && order.status !== "COMPLETED") {
-        toast.info("You can only review completed orders");
-      } else if (!order) {
-        toast.error("Order not found");
-      }
-    } else if (reviewParam && (!isAuthenticated || !user)) {
-      toast.info("Please log in using the navigation bar to leave a review");
-    }
-  }, [searchParams, orders, user, isAuthenticated]);
 
   useEffect(() => {
     if (authLoading) return;
