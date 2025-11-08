@@ -26,22 +26,26 @@ const Header: React.FC = () => {
 
   // Logic to handle cartModal
   const handleOpen = () => {
+    console.log("handleOpen (cart) called");
     setShowCartModal(true);
     setTimeout(() => setAnimateModal(true), 10);
   };
 
   const handleClose = () => {
+    console.log("handleClose (cart) called");
     setAnimateModal(false);
     setTimeout(() => setShowCartModal(false), 300);
   };
 
   // Logic to handle userModal
   const handleOpenUser = () => {
+    console.log("handleOpenUser called");
     setShowUserModal(true);
     setTimeout(() => setAnimateUserModal(true), 10);
   };
 
   const handleCloseUser = () => {
+    console.log("handleCloseUser called");
     setAnimateUserModal(false);
     setTimeout(() => setShowUserModal(false), 300);
   };
@@ -261,6 +265,14 @@ const Header: React.FC = () => {
           handleClose={handleCloseUser}
           animateModal={animateUserModal}
         />
+      )}
+
+      {/* Debug info for Header */}
+      {process.env.NODE_ENV === "development" && (
+        <div className="fixed bottom-4 left-4 bg-red-600 text-white p-2 text-xs rounded z-50">
+          Header - Cart: {showCartModal ? "true" : "false"} | User:{" "}
+          {showUserModal ? "true" : "false"}
+        </div>
       )}
     </>
   );

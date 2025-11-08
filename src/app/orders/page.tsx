@@ -71,7 +71,6 @@ const OrdersContent: React.FC = () => {
   const searchParams = useSearchParams();
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewOrderId, setReviewOrderId] = useState<string | null>(null);
-  const [pendingReviewOrderId, setPendingReviewOrderId] = useState<string | null>(null);
 
   const fetchOrders = useCallback(async () => {
     if (!user?.id) return;
@@ -105,63 +104,24 @@ const OrdersContent: React.FC = () => {
     }
   };
 
-  // Check for review parameter in URL
+  // Check for review parameter in URL - simplified
   useEffect(() => {
     const reviewParam = searchParams.get("review");
-    console.log("Review param check:", {
-      reviewParam,
-      isAuthenticated,
-      user: !!user,
-    });
-
-    if (reviewParam) {
-      // If user is not authenticated, show a message and store the review order ID
-      if (!isAuthenticated || !user) {
-        console.log("User not authenticated, storing pending review");
-        setPendingReviewOrderId(reviewParam);
-        toast.info(
-          "Please log in using the user icon in the navigation to leave a review for your order"
-        );
-        return;
-      }
-
-      // If user is authenticated, check if they have orders loaded
-      if (orders && orders.length > 0) {
-        const order = orders.find((o) => o.id === reviewParam);
-        if (order && order.status === "COMPLETED") {
-          console.log("Setting review modal to true");
-          setReviewOrderId(reviewParam);
-          setShowReviewModal(true);
-          toast.success("You can now leave a review for your completed order!");
-        } else if (order && order.status !== "COMPLETED") {
-          toast.info("You can only review completed orders");
-        } else {
-          toast.error("Order not found");
-        }
-      }
-    }
-  }, [searchParams, orders, user, isAuthenticated]);
-
-  // Handle successful login when there's a pending review
-  useEffect(() => {
-    if (isAuthenticated && user && pendingReviewOrderId && orders.length > 0) {
-      const order = orders.find((o) => o.id === pendingReviewOrderId);
+    if (reviewParam && isAuthenticated && user && orders && orders.length > 0) {
+      const order = orders.find((o) => o.id === reviewParam);
       if (order && order.status === "COMPLETED") {
-        setReviewOrderId(pendingReviewOrderId);
+        setReviewOrderId(reviewParam);
         setShowReviewModal(true);
-        setPendingReviewOrderId(null);
-        toast.success(
-          "Welcome back! You can now leave a review for your order."
-        );
+        toast.success("You can now leave a review for your completed order!");
       } else if (order && order.status !== "COMPLETED") {
         toast.info("You can only review completed orders");
-        setPendingReviewOrderId(null);
-      } else {
+      } else if (!order) {
         toast.error("Order not found");
-        setPendingReviewOrderId(null);
       }
+    } else if (reviewParam && (!isAuthenticated || !user)) {
+      toast.info("Please log in using the navigation bar to leave a review");
     }
-  }, [isAuthenticated, user, pendingReviewOrderId, orders]);
+  }, [searchParams, orders, user, isAuthenticated]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -169,8 +129,8 @@ const OrdersContent: React.FC = () => {
     // Only fetch orders if user is authenticated
     if (isAuthenticated && user) {
       fetchOrders();
-    } else if (!authLoading) {
-      // If not authenticated and not loading, just set loading to false
+    } else {
+      // If not authenticated, just set loading to false
       setLoading(false);
     }
   }, [user, isAuthenticated, authLoading, fetchOrders]);
@@ -224,19 +184,15 @@ const OrdersContent: React.FC = () => {
               Please log in to view your orders
             </h2>
             <p className="text-gray-600 mb-6">
-              Sign in to access your order history and track your purchases
+              Use the sign in button in the navigation bar to access your order
+              history
             </p>
-            <button
-              onClick={() => {
-                console.log("Sign in button clicked");
-                toast.info(
-                  "Please use the user icon in the navigation bar to sign in"
-                );
-              }}
+            <Link
+              href="/"
               className="inline-block px-6 py-3 bg-[#3474c0] text-white rounded-lg hover:bg-[#2a5a9e] transition-colors duration-200 font-medium"
             >
-              Sign In
-            </button>
+              Go to Homepage
+            </Link>
           </div>
         </div>
       </div>
@@ -404,10 +360,6 @@ const OrdersContent: React.FC = () => {
                         </button>
                         <button
                           onClick={() => {
-                            console.log(
-                              "Review button clicked for order:",
-                              order.id
-                            );
                             setReviewOrderId(order.id);
                             setShowReviewModal(true);
                           }}
@@ -436,15 +388,6 @@ const OrdersContent: React.FC = () => {
           </div>
         )}
       </div>
-
-      {/* Debug info */}
-      {process.env.NODE_ENV === "development" && (
-        <div className="fixed bottom-4 right-4 bg-black text-white p-2 text-xs rounded z-50">
-          ReviewModal: {showReviewModal ? "true" : "false"} | User:{" "}
-          {user ? "logged in" : "not logged in"} | PendingReview:{" "}
-          {pendingReviewOrderId ? "yes" : "no"}
-        </div>
-      )}
 
       {/* Simple Review Modal */}
       {showReviewModal && reviewOrderId && (
