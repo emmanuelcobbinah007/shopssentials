@@ -4,6 +4,7 @@ import { ShoppingCart, CalendarTick, Box, ArrowLeft } from "iconsax-reactjs";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Image from "next/image";
+import Link from "next/link";
 
 interface OrderItem {
   id: string;
@@ -31,9 +32,10 @@ interface Order {
 
 interface MyOrdersProps {
   onBack: () => void;
+  onCloseModal?: () => void;
 }
 
-const MyOrders: React.FC<MyOrdersProps> = ({ onBack }) => {
+const MyOrders: React.FC<MyOrdersProps> = ({ onBack, onCloseModal }) => {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,13 +97,6 @@ const MyOrders: React.FC<MyOrdersProps> = ({ onBack }) => {
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <button
-            onClick={() => setSelectedOrder(null)}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <ArrowLeft size={16} />
-            <span className="text-sm">Back to Orders</span>
-          </button>
           <span className="text-sm text-gray-500">
             Order #{selectedOrder.id.slice(-8)}
           </span>
@@ -190,18 +185,13 @@ const MyOrders: React.FC<MyOrdersProps> = ({ onBack }) => {
       ) : (
         <>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={onBack}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                <ArrowLeft size={16} />
-                <span className="text-sm">Back</span>
-              </button>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Your Orders
-              </h3>
-            </div>
+            <Link
+              href="/orders"
+              onClick={onCloseModal}
+              className="text-sm text-[#3474c0] hover:text-[#2a5a9e]"
+            >
+              <p>View all orders</p>
+            </Link>
             <span className="text-sm text-gray-600">
               {orders.length} orders
             </span>

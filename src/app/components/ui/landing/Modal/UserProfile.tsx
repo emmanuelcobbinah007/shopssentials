@@ -1,13 +1,19 @@
 import React from "react";
 import { User } from "iconsax-reactjs";
 import { useAuth } from "@/app/contexts/AuthContext";
+import Link from "next/link";
 
 interface UserProfileProps {
   onSignOut?: () => void;
   onMyOrders?: () => void;
+  onCloseModal?: () => void;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ onSignOut, onMyOrders }) => {
+const UserProfile: React.FC<UserProfileProps> = ({
+  onSignOut,
+  onMyOrders,
+  onCloseModal,
+}) => {
   const { user, logout } = useAuth();
 
   const displayName = user ? `${user.firstname} ${user.lastname}` : "User";
@@ -29,7 +35,9 @@ const UserProfile: React.FC<UserProfileProps> = ({ onSignOut, onMyOrders }) => {
           className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
         >
           <div className="font-medium text-gray-900">My Orders</div>
-          <div className="text-sm text-gray-600">View your order history</div>
+          <div className="text-sm text-gray-600">
+            View recent orders in modal
+          </div>
         </button>
 
         <button className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">

@@ -38,6 +38,29 @@ enum Storefront {
   ALL
 }
 
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
+model Review {
+  id        String   @id @default(uuid()) @db.Uuid
+  rating    Int      // 1-5 star rating
+  comment   String?  // Optional review comment
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  productId String   @db.Uuid
+  product   Product  @relation(fields: [productId], references: [id])
+  orderId   String   @db.Uuid
+  order     Order    @relation(fields: [orderId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId, orderId]) // Prevent duplicate reviews for same user/product/order combo
+}
+
 model User {
   id        String    @id @default(uuid()) @db.Uuid
   firstname String
@@ -56,6 +79,7 @@ model User {
   createdAt DateTime  @default(now())
   carts      Cart[]
   orders    Order[]
+  reviews   Review[]
   emailList EmailList[]
 
   @@unique([email, storefront]) 
@@ -101,6 +125,7 @@ model Product {
   featuredProduct  FeaturedProduct?
   cartItems        CartItem[]
   orderItems       OrderItem[]
+  reviews          Review[]
   salePercent      Float          @default(0.0)
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
@@ -161,9 +186,10 @@ model CartItem {
 
 model Order {
   id          String      @id @default(uuid()) @db.Uuid
-  isCompleted Boolean     @default(false)
+  status      OrderStatus @default(PENDING)
   storefront  Storefront? @default(LORACE)
   orderItems  OrderItem[]
+  reviews     Review[]
   userId      String      @db.Uuid
   user        User        @relation(fields: [userId], references: [id])
   createdAt   DateTime    @default(now())
