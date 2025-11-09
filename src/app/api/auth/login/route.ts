@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "../../../../generated/prisma";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 
@@ -44,6 +45,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Generate JWT token
+    const jwtSecret = process.env.JWT_SECRET || "fallback-secret";
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+      },
+      jwtSecret,
+      { expiresIn: "7d" }
+    );
+
     // Return success response (you might want to add JWT token generation here later)
     console.log("Login API: user from database:", {
       id: user.id,
@@ -57,6 +70,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         message: "Login successful",
+        token,
         user: {
           id: user.id,
           email: user.email,

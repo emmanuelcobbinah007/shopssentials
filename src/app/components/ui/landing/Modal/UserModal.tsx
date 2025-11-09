@@ -43,6 +43,12 @@ const UserModal: React.FC<UserModalProps> = ({ handleClose, animateModal }) => {
 
       // Store user data in auth context
       login(response.data.user);
+
+      // Store JWT token in localStorage
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      }
+
       toast.success("Login successful!");
       changeState("profile");
     } catch (error) {
@@ -74,10 +80,18 @@ const UserModal: React.FC<UserModalProps> = ({ handleClose, animateModal }) => {
         storefront: "SHOPSSENTIALS",
       };
 
-      await axios.post("/api/auth/signup", signupData);
+      const response = await axios.post("/api/auth/signup", signupData);
 
-      toast.success("Account created successfully! Please sign in.");
-      changeState("signin");
+      // Store user data in auth context
+      login(response.data.user);
+
+      // Store JWT token in localStorage
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      }
+
+      toast.success("Account created successfully!");
+      changeState("profile");
     } catch (error) {
       console.error("Sign up error:", error);
       const errorMessage =

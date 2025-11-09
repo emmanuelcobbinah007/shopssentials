@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ReviewModal from "../components/ui/ReviewModal";
 
 interface OrderItem {
   id: string;
@@ -31,6 +32,7 @@ interface Order {
   orderItems: OrderItem[];
   total: number;
   itemCount: number;
+  hasReviewed?: boolean;
 }
 
 const formatOrderStatus = (status: string) => {
@@ -68,8 +70,7 @@ const OrdersContent: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [reviewOrderId, setReviewOrderId] = useState<string | null>(null);
+  const [reviewModalOrder, setReviewModalOrder] = useState<Order | null>(null);
 
   const fetchOrders = useCallback(async () => {
     if (!user?.id) return;
@@ -81,7 +82,34 @@ const OrdersContent: React.FC = () => {
       );
 
       if (response.data.success) {
-        setOrders(response.data.orders);
+        const ordersWithReviewStatus = await Promise.all(
+          response.data.orders.map(async (order: Order) => {
+            if (order.status === "COMPLETED") {
+              try {
+                const token =
+                  localStorage.getItem("token") ||
+                  localStorage.getItem("accessToken");
+                const reviewResponse = await axios.get(
+                  `/api/reviews/check?orderId=${order.id}`,
+                  {
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                    },
+                  }
+                );
+                return {
+                  ...order,
+                  hasReviewed: reviewResponse.data.hasReviewedAll,
+                };
+              } catch (error) {
+                console.error("Error checking review status:", error);
+                return { ...order, hasReviewed: false };
+              }
+            }
+            return order;
+          })
+        );
+        setOrders(ordersWithReviewStatus);
       }
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -90,6 +118,14 @@ const OrdersContent: React.FC = () => {
       setLoading(false);
     }
   }, [user?.id]);
+
+  const handleReviewOrder = (order: Order) => {
+    setReviewModalOrder(order);
+  };
+
+  const handleReviewsSubmitted = () => {
+    fetchOrders(); // Refresh orders to update review status
+  };
 
   const handleReorderItems = (order: Order) => {
     // If multiple items, go to shop page
@@ -120,7 +156,6 @@ const OrdersContent: React.FC = () => {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3474c0] mb-4"></div>
-          <p className="mt-4 text-gray-600">Loading your orders...</p>
         </div>
       </div>
     );
@@ -338,15 +373,18 @@ const OrdersContent: React.FC = () => {
                         >
                           Reorder Items
                         </button>
-                        <button
-                          onClick={() => {
-                            setReviewOrderId(order.id);
-                            setShowReviewModal(true);
-                          }}
-                          className="flex-1 px-4 py-2 border-2 border-[#3474c0] text-[#3474c0] rounded-lg hover:bg-[#3474c0] hover:text-white transition-colors duration-200 font-medium"
-                        >
-                          Leave a Review
-                        </button>
+                        {order.hasReviewed ? (
+                          <div className="flex-1 px-4 py-2 border-2 border-green-200 text-green-700 bg-green-50 rounded-lg font-medium text-center">
+                            ✓ Reviews Submitted
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleReviewOrder(order)}
+                            className="flex-1 px-4 py-2 border-2 border-[#3474c0] text-[#3474c0] rounded-lg hover:bg-[#3474c0] hover:text-white transition-colors duration-200 font-medium"
+                          >
+                            Leave a Review
+                          </button>
+                        )}
                       </div>
                     </div>
                   )}
@@ -369,106 +407,14 @@ const OrdersContent: React.FC = () => {
         )}
       </div>
 
-      {/* Simple Review Modal */}
-      {showReviewModal && reviewOrderId && (
-        <div
-          className="fixed inset-0 backdrop-blur-sm bg-black/50 bg-opacity-50 flex items-center justify-center z-[9999999] p-4"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setShowReviewModal(false);
-              setReviewOrderId(null);
-              // Remove review parameter from URL
-              window.history.replaceState({}, "", "/orders");
-            }
-          }}
-        >
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl">
-            {/* Header */}
-            <div className="relative px-6 py-4 border-b border-gray-100">
-              <div className="absolute top-4 right-4">
-                <button
-                  onClick={() => {
-                    setShowReviewModal(false);
-                    setReviewOrderId(null);
-                    window.history.replaceState({}, "", "/orders");
-                  }}
-                  className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors duration-200 group"
-                >
-                  <svg
-                    className="w-4 h-4 text-gray-500 group-hover:text-gray-700"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              <div className="text-center">
-                <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#3474c0] via-[#4fb3e5] to-[#3474c0] mb-2">
-                  Leave a Review
-                </h2>
-                <div className="bg-gradient-to-r from-[#3474c0]/10 via-[#4fb3e5]/10 to-[#3474c0]/10 rounded-lg px-4 py-2 inline-block">
-                  <p className="text-sm font-medium text-gray-700">
-                    Order #{reviewOrderId.slice(-8).toUpperCase()}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="px-6 py-6">
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-[#3474c0]/10 rounded-full flex items-center justify-center">
-                  <svg
-                    className="w-8 h-8 text-[#3474c0]"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  Review Your Order
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Thank you for your purchase! Your review helps other customers
-                  make informed decisions.
-                </p>
-                <p className="text-sm text-[#3474c0] font-medium">
-                  Review functionality coming soon!
-                </p>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="px-6 py-4 bg-gray-50 rounded-b-2xl">
-              <button
-                onClick={() => {
-                  setShowReviewModal(false);
-                  setReviewOrderId(null);
-                  window.history.replaceState({}, "", "/orders");
-                  toast.success("Thank you for your interest in reviewing!");
-                }}
-                className="w-full px-6 py-3 bg-[#3474c0] text-white rounded-xl hover:bg-[#2a5a9e] hover:shadow-lg transition-all duration-200 font-medium"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Review Modal */}
+      {reviewModalOrder && (
+        <ReviewModal
+          order={reviewModalOrder}
+          isOpen={!!reviewModalOrder}
+          onClose={() => setReviewModalOrder(null)}
+          onReviewsSubmitted={handleReviewsSubmitted}
+        />
       )}
     </div>
   );
@@ -481,7 +427,6 @@ const OrdersPage: React.FC = () => {
         <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3474c0] mb-4"></div>
-            <p className="mt-4 text-gray-600">Loading your orders...</p>
           </div>
         </div>
       }

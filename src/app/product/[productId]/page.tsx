@@ -10,6 +10,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { usePaystack } from "../../hooks/usePaystack";
 import { toast } from "react-toastify";
 import CheckoutModal from "../../components/ui/landing/Modal/CheckoutModal";
+import ProductReviews from "../../components/ui/ProductReviews";
 
 interface ProductPageProps {
   params: Promise<{
@@ -576,6 +577,11 @@ function ProductDisplay({ product }: { product: Product }) {
                 </ul>
               </div>
             </div>
+          </div>
+
+          {/* Product Reviews Section */}
+          <div className="mt-12">
+            <ProductReviews productId={product.id} />
           </div>
 
           {/* Related Products Section */}
