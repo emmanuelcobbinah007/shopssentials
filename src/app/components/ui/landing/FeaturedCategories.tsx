@@ -9,12 +9,25 @@ import Link from "next/link";
 // Animation Variants
 const containerVariants = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.15 } },
+  visible: {},
 };
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+const cardVariants = (index: number, total: number) => {
+  const centerIndex = Math.floor(total / 2);
+  const distanceFromCenter = Math.abs(index - centerIndex);
+  const delay = distanceFromCenter * 0.15; // 0.15s delay per step from center
+
+  return {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        delay: delay,
+      },
+    },
+  };
 };
 
 const FeaturedCategories: React.FC = () => {
@@ -104,7 +117,7 @@ const FeaturedCategories: React.FC = () => {
                   }`}
                 >
                   <motion.div
-                    variants={cardVariants}
+                    variants={cardVariants(index, categories.length)}
                     className="relative flex flex-col items-center rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow duration-300 p-6 hover:-translate-y-1 cursor-pointer"
                   >
                     <div className="w-20 h-20 flex items-center justify-center rounded-full bg-gray-50 mb-5 border border-gray-100 group-hover:border-gray-300 transition-colors duration-300">
