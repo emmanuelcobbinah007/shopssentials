@@ -77,8 +77,8 @@ export async function GET(request: NextRequest) {
         orderBy.createdAt = "desc";
         break;
       case "rating":
-        // For now, we'll sort by createdAt as we don't have ratings in the schema
-        orderBy.createdAt = "desc";
+        // We'll handle rating sorting after fetching products
+        orderBy.createdAt = "desc"; // Default fallback
         break;
       default:
         orderBy.name = "asc";
@@ -108,6 +108,11 @@ export async function GET(request: NextRequest) {
               name: true,
             },
           },
+          reviews: {
+            select: {
+              rating: true,
+            },
+          },
         },
         orderBy,
         skip,
@@ -117,24 +122,41 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Transform products to match frontend expectations
-    const transformedProducts = products.map((product) => ({
-      id: product.id,
-      name: product.name,
-      price: `₵${product.price.toFixed(2)}`,
-      originalPrice:
-        product.salePercent > 0
-          ? `₵${(product.price / (1 - product.salePercent / 100)).toFixed(2)}`
-          : undefined,
-      image: product.images[0]?.url || "/images/placeholder.jpg",
-      description: product.descriptionShort,
-      category: product.category.name.toLowerCase().replace(/\s+/g, "-"),
-      rating: 4.5, // Default rating since we don't have ratings in schema
-      reviews: Math.floor(Math.random() * 50) + 1, // Mock reviews count
-      inStock: product.stock > 0,
-      isOnSale: product.salePercent > 0,
-      categoryId: product.categoryId,
-      subCategoryId: product.subCategoryId,
-    }));
+    let transformedProducts = products.map((product) => {
+      // Calculate average rating from reviews
+      const reviewCount = product.reviews.length;
+      const averageRating =
+        reviewCount > 0
+          ? product.reviews.reduce((sum, review) => sum + review.rating, 0) /
+            reviewCount
+          : 0;
+
+      return {
+        id: product.id,
+        name: product.name,
+        price: `₵${product.price.toFixed(2)}`,
+        originalPrice:
+          product.salePercent > 0
+            ? `₵${(product.price / (1 - product.salePercent / 100)).toFixed(2)}`
+            : undefined,
+        image: product.images[0]?.url || "/images/placeholder.jpg",
+        description: product.descriptionShort,
+        category: product.category.name.toLowerCase().replace(/\s+/g, "-"),
+        rating: averageRating,
+        reviews: reviewCount,
+        inStock: product.stock > 0,
+        isOnSale: product.salePercent > 0,
+        categoryId: product.categoryId,
+        subCategoryId: product.subCategoryId,
+      };
+    });
+
+    // Handle rating sorting (highest first)
+    if (sortBy === "rating") {
+      transformedProducts = transformedProducts.sort(
+        (a, b) => b.rating - a.rating
+      );
+    }
 
     return NextResponse.json({
       products: transformedProducts,
