@@ -326,7 +326,7 @@ const ShopPageContent: React.FC = () => {
               {renderStars(product.rating)}
               <span className="text-xs text-gray-500">({product.reviews})</span>
             </div>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 md:mb-2">
               <span className="text-lg sm:text-xl font-bold text-[#3474c0]">
                 {product.price}
               </span>
@@ -336,7 +336,7 @@ const ShopPageContent: React.FC = () => {
                 </span>
               )}
             </div>
-            <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">
+            <p className="hidden md:block text-xs sm:text-sm text-gray-600 line-clamp-2">
               {product.description}
             </p>
           </div>
