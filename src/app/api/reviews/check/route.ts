@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
           userId?: string;
           id?: string;
         };
-      } catch (_fallbackError) {
+      } catch {
         throw error; // Throw original error if both fail
       }
     }

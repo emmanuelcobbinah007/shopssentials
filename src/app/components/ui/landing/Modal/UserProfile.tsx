@@ -5,14 +5,9 @@ import { useAuth } from "@/app/contexts/AuthContext";
 interface UserProfileProps {
   onSignOut?: () => void;
   onMyOrders?: () => void;
-  onCloseModal?: () => void;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({
-  onSignOut,
-  onMyOrders,
-  onCloseModal,
-}) => {
+const UserProfile: React.FC<UserProfileProps> = ({ onSignOut, onMyOrders }) => {
   const { user, logout } = useAuth();
 
   const displayName = user ? `${user.firstname} ${user.lastname}` : "User";
