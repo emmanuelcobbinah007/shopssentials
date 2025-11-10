@@ -110,7 +110,7 @@ const Newsletter: React.FC = () => {
                     />
                   </svg>
                 </div>
-                <p className="text-white font-medium">
+                <p className="text-white font-medium truncate md:whitespace-normal md:overflow-visible">
                   {isAuthenticated
                     ? `Subscribed with ${user?.email}`
                     : "Successfully subscribed!"}

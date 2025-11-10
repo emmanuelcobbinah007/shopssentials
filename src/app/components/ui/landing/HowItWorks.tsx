@@ -34,7 +34,10 @@ const HowItWorks: React.FC = () => {
           </p>
         </div>
 
-        <div className="relative flex md:grid md:grid-cols-3 gap-8 overflow-x-auto pl-4 md:pl-0">
+        <div
+          className="relative flex md:grid md:grid-cols-3 gap-8 overflow-x-auto pl-4 md:pl-0"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
           {steps.map((step, index) => (
             <div
               key={step.id}
