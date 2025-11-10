@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/app/contexts/AuthContext";
-import { ShoppingCart, CalendarTick, Box, ArrowLeft } from "iconsax-reactjs";
+import { ShoppingCart, CalendarTick, Box } from "iconsax-reactjs";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Image from "next/image";
@@ -31,11 +31,10 @@ interface Order {
 }
 
 interface MyOrdersProps {
-  onBack: () => void;
   onCloseModal?: () => void;
 }
 
-const MyOrders: React.FC<MyOrdersProps> = ({ onBack, onCloseModal }) => {
+const MyOrders: React.FC<MyOrdersProps> = ({ onCloseModal }) => {
   const { user } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);

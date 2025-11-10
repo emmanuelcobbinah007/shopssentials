@@ -67,7 +67,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   const updateReview = (
     productId: string,
     field: "rating" | "comment",
-    value: any
+    value: string | number
   ) => {
     setReviews((prev) =>
       prev.map((review) =>
@@ -117,10 +117,11 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
       setTimeout(() => {
         handleClose();
       }, 2000);
-    } catch (error: any) {
-      console.error("Error submitting reviews:", error);
+    } catch (err: unknown) {
+      console.error("Error submitting reviews:", err);
       setSubmitStatus("error");
-      toast.error(error.message || "Failed to submit reviews");
+      const message = err instanceof Error ? err.message : String(err);
+      toast.error(message || "Failed to submit reviews");
     } finally {
       setIsSubmitting(false);
     }

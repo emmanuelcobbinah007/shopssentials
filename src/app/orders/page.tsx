@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { ShoppingCart, CalendarTick, Box, ArrowLeft } from "iconsax-reactjs";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Image from "next/image";
@@ -253,7 +252,7 @@ const OrdersContent: React.FC = () => {
               No orders yet
             </h3>
             <p className="text-gray-500 mb-6">
-              You haven't placed any orders. Start shopping now!
+              You haven&apos;t placed any orders. Start shopping now!
             </p>
             <Link
               href="/shop"

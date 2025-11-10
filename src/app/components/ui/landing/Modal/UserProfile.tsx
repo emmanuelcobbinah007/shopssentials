@@ -1,7 +1,6 @@
 import React from "react";
 import { User } from "iconsax-reactjs";
 import { useAuth } from "@/app/contexts/AuthContext";
-import Link from "next/link";
 
 interface UserProfileProps {
   onSignOut?: () => void;

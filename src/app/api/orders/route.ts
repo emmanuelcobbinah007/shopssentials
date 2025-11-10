@@ -34,12 +34,7 @@ interface OrderWithTotals extends OrderWithItems {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      userId,
-      items,
-      paymentReference,
-      storefront = "SHOPSSENTIALS",
-    } = body;
+    const { userId, items, storefront = "SHOPSSENTIALS" } = body;
 
     // Validate required fields
     if (!userId || !items || !Array.isArray(items) || items.length === 0) {

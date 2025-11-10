@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Prepare order items for email
-    const orderItems = order.orderItems.map((item: any) => ({
+    const orderItems = order.orderItems.map((item) => ({
       productName: item.product.name,
       quantity: item.quantity,
       size: item.size || undefined,

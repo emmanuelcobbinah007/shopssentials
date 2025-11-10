@@ -19,23 +19,26 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let decoded: any;
+    let decoded: { userId?: string; id?: string } | undefined;
     try {
       decoded = jwt.verify(
         token,
         process.env.JWT_SECRET || "fallback-secret"
-      ) as any;
+      ) as { userId?: string; id?: string };
     } catch (error) {
       // Try with fallback secret for backward compatibility
       try {
-        decoded = jwt.verify(token, "fallback-secret") as any;
-      } catch (fallbackError) {
+        decoded = jwt.verify(token, "fallback-secret") as {
+          userId?: string;
+          id?: string;
+        };
+      } catch (_fallbackError) {
         throw error; // Throw original error if both fail
       }
     }
 
     // Handle both old format (id) and new format (userId)
-    const userId = decoded.userId || decoded.id;
+    const userId = decoded?.userId || decoded?.id;
 
     const { searchParams } = new URL(request.url);
     const orderId = searchParams.get("orderId");

@@ -92,25 +92,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let decoded: any;
+    let decoded: { userId?: string; id?: string } | undefined;
     try {
       decoded = jwt.verify(
         token,
         process.env.JWT_SECRET || "fallback-secret"
-      ) as any;
+      ) as { userId?: string; id?: string };
     } catch (error) {
       // Try with fallback secret for backward compatibility
       try {
-        decoded = jwt.verify(token, "fallback-secret") as any;
-      } catch (fallbackError) {
+        decoded = jwt.verify(token, "fallback-secret") as {
+          userId?: string;
+          id?: string;
+        };
+      } catch (_fallbackError) {
         throw error; // Throw original error if both fail
       }
     }
 
     // Handle both old format (id) and new format (userId)
-    const userId = decoded.userId || decoded.id;
+    const userId = decoded?.userId || decoded?.id;
 
-    const body = await request.json();
+    if (!userId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Authentication required",
+        },
+        { status: 401 }
+      );
+    }
+
+    const body = (await request.json()) as {
+      productId: string;
+      orderId: string;
+      rating: number;
+      comment?: string | null;
+    };
     const { productId, orderId, rating, comment } = body;
 
     // Validate required fields
@@ -230,10 +248,24 @@ export async function PUT(request: NextRequest) {
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET || "fallback-secret"
-    ) as any;
+    ) as { userId?: string; id?: string };
     const userId = decoded.userId || decoded.id;
 
-    const body = await request.json();
+    if (!userId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Authentication required",
+        },
+        { status: 401 }
+      );
+    }
+
+    const body = (await request.json()) as {
+      reviewId: string;
+      rating: number;
+      comment?: string | null;
+    };
     const { reviewId, rating, comment } = body;
 
     if (!reviewId || !rating || rating < 1 || rating > 5) {

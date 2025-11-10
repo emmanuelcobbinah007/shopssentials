@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
 import Image from "next/image";
 
 interface Review {
@@ -32,11 +31,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
   const [averageRating, setAverageRating] = useState<number>(0);
   const [totalReviews, setTotalReviews] = useState<number>(0);
 
-  useEffect(() => {
-    fetchReviews();
-  }, [productId]);
-
-  const fetchReviews = async () => {
+  const fetchReviews = React.useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -44,7 +39,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
       const response = await axios.get(`/api/reviews?productId=${productId}`);
 
       if (response.data.success) {
-        const reviewsData = response.data.reviews;
+        const reviewsData = response.data.reviews as Review[];
         setReviews(reviewsData);
         setTotalReviews(reviewsData.length);
 
@@ -60,13 +55,17 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
       } else {
         setError(response.data.error || "Failed to load reviews");
       }
-    } catch (error: any) {
-      console.error("Error fetching reviews:", error);
+    } catch (err: unknown) {
+      console.error("Error fetching reviews:", err);
       setError("Failed to load reviews");
     } finally {
       setLoading(false);
     }
-  };
+  }, [productId]);
+
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
 
   const renderStars = (rating: number, size: "sm" | "md" | "lg" = "md") => {
     const sizeClasses = {
