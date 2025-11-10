@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { motion, useAnimation, AnimatePresence } from "framer-motion";
-import { useInView } from "react-intersection-observer";
+import { motion } from "framer-motion";
 import { useCategories } from "../../../hooks/useProducts";
 import Link from "next/link";
 
@@ -15,19 +14,19 @@ const containerVariants = {
 
 const cardVariants = {
   hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
-  exit: { opacity: 0, y: 30, transition: { duration: 0.4 } },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
 
 const FeaturedCategories: React.FC = () => {
-  const controls = useAnimation();
-  const [ref, inView] = useInView({ triggerOnce: false, threshold: 0.1 });
+  const [isLoaded, setIsLoaded] = useState(false);
   const { data: categories, isLoading, error } = useCategories();
 
   useEffect(() => {
-    if (inView) controls.start("visible");
-    else controls.start("hidden");
-  }, [controls, inView]);
+    if (categories && categories.length > 0 && !isLoading) {
+      // Small delay to ensure smooth transition from loading to animation
+      setTimeout(() => setIsLoaded(true), 100);
+    }
+  }, [categories, isLoading]);
 
   if (isLoading) {
     return (
@@ -36,6 +35,9 @@ const FeaturedCategories: React.FC = () => {
           <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-[#1A1D23]">
             Featured Categories
           </h2>
+          <p className="text-gray-500 mb-12">
+            Intentional categories to bring your store to life
+          </p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
           {[...Array(5)].map((_, i) => {
@@ -78,18 +80,17 @@ const FeaturedCategories: React.FC = () => {
           Featured Categories
         </h2>
         <p className="text-gray-500 mb-12">
-          Curated pieces to elevate every corner of your home
+          Intentional categories to bring your store to life
         </p>
 
         <motion.div
-          ref={ref}
           variants={containerVariants}
           initial="hidden"
-          animate={controls}
+          animate={isLoaded ? "visible" : "hidden"}
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8"
         >
-          <AnimatePresence>
-            {categories?.map((category, index) => {
+          {categories && categories.length > 0 ? (
+            categories.map((category, index) => {
               const isOddCount = categories.length % 2 === 1;
               const isLastItem = index === categories.length - 1;
               const shouldSpanTwo = isOddCount && isLastItem;
@@ -104,7 +105,6 @@ const FeaturedCategories: React.FC = () => {
                 >
                   <motion.div
                     variants={cardVariants}
-                    exit="exit"
                     className="relative flex flex-col items-center rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow duration-300 p-6 hover:-translate-y-1 cursor-pointer"
                   >
                     <div className="w-20 h-20 flex items-center justify-center rounded-full bg-gray-50 mb-5 border border-gray-100 group-hover:border-gray-300 transition-colors duration-300">
@@ -126,8 +126,12 @@ const FeaturedCategories: React.FC = () => {
                   </motion.div>
                 </Link>
               );
-            })}
-          </AnimatePresence>
+            })
+          ) : (
+            <div className="col-span-full text-center py-8">
+              <p className="text-gray-500">No categories available</p>
+            </div>
+          )}
         </motion.div>
       </div>
     </section>

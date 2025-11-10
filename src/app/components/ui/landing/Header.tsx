@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { ShoppingCart, User } from "iconsax-reactjs";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import logo from "../../../../../public/images/logo.png";
 import CartModal from "./Modal/CartModal";
 import UserModal from "./Modal/UserModal";
@@ -14,6 +15,43 @@ const navLinks = [
   { id: "about", label: "About", href: "/about" },
   { id: "contact", label: "Contact", href: "/contact" },
 ];
+
+// Animation variants
+const headerVariants = {
+  hidden: { opacity: 0, y: -20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const logoVariants = {
+  hidden: { scale: 0.8, opacity: 0 },
+  visible: {
+    scale: 1,
+    opacity: 1,
+    transition: { duration: 0.5, type: "spring" as const, stiffness: 200 },
+  },
+};
+
+const navItemVariants = {
+  hidden: { opacity: 0, y: -10 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const iconVariants = {
+  hidden: { scale: 0, opacity: 0 },
+  visible: {
+    scale: 1,
+    opacity: 1,
+    transition: { duration: 0.3, type: "spring" as const, stiffness: 300 },
+  },
+  hover: { scale: 1.1, transition: { duration: 0.2 } },
+};
 
 const Header: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -84,7 +122,10 @@ const Header: React.FC = () => {
   return (
     <>
       {/* Header */}
-      <header
+      <motion.header
+        variants={headerVariants}
+        initial="hidden"
+        animate="visible"
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled ? "pt-2" : "pt-4"
         }`}
@@ -102,20 +143,22 @@ const Header: React.FC = () => {
             }`}
           >
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3">
-              <div
-                className={`transition-all duration-500 ${
-                  scrolled ? "w-[70px] sm:w-[80px]" : "w-[90px] sm:w-[100px]"
-                }`}
-              >
-                <Image
-                  width={100}
-                  height={100}
-                  src={logo.src}
-                  alt="Shopssentials logo"
-                />
-              </div>
-            </Link>
+            <motion.div variants={logoVariants}>
+              <Link href="/" className="flex items-center gap-3">
+                <div
+                  className={`transition-all duration-500 ${
+                    scrolled ? "w-[70px] sm:w-[80px]" : "w-[90px] sm:w-[100px]"
+                  }`}
+                >
+                  <Image
+                    width={100}
+                    height={100}
+                    src={logo.src}
+                    alt="Shopssentials logo"
+                  />
+                </div>
+              </Link>
+            </motion.div>
 
             {/* Desktop nav */}
             <div
@@ -126,35 +169,40 @@ const Header: React.FC = () => {
               }
             >
               {navLinks.map((link) => (
-                <Link
-                  key={link.id}
-                  href={link.href}
-                  className={
-                    scrolled
-                      ? "transition-all duration-500 text-sm font-medium text-gray-700 hover:text-[#3474c0] px-2 py-1 rounded-full hover:bg-[#3474c0]/10"
-                      : "transition-all duration-500 text-base font-medium text-gray-700 hover:text-[#3474c0]"
-                  }
-                >
-                  {link.label}
-                </Link>
+                <motion.div key={link.id} variants={navItemVariants}>
+                  <Link
+                    href={link.href}
+                    className={
+                      scrolled
+                        ? "transition-all duration-500 text-sm font-medium text-gray-700 hover:text-[#3474c0] px-2 py-1 rounded-full hover:bg-[#3474c0]/10"
+                        : "transition-all duration-500 text-base font-medium text-gray-700 hover:text-[#3474c0]"
+                    }
+                  >
+                    {link.label}
+                  </Link>
+                </motion.div>
               ))}
             </div>
 
             {/* Right actions */}
             <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center gap-4">
-                <User
-                  size={scrolled ? "18" : "20"}
-                  color="#3474c0"
-                  onClick={handleOpenUser}
-                  className="hover:cursor-pointer hover:scale-105 duration-300 transition-all"
-                />
-                <ShoppingCart
-                  size={scrolled ? "18" : "20"}
-                  color="#3474c0"
-                  onClick={handleOpen}
-                  className="hover:cursor-pointer hover:scale-105 duration-300 transition-all"
-                />
+                <motion.div variants={iconVariants} whileHover="hover">
+                  <User
+                    size={scrolled ? "18" : "20"}
+                    color="#3474c0"
+                    onClick={handleOpenUser}
+                    className="hover:cursor-pointer transition-all"
+                  />
+                </motion.div>
+                <motion.div variants={iconVariants} whileHover="hover">
+                  <ShoppingCart
+                    size={scrolled ? "18" : "20"}
+                    color="#3474c0"
+                    onClick={handleOpen}
+                    className="hover:cursor-pointer transition-all"
+                  />
+                </motion.div>
               </div>
 
               {/* Mobile menu button */}
@@ -215,40 +263,45 @@ const Header: React.FC = () => {
             <div className="w-full bg-white border border-gray-200/50 shadow-lg rounded-2xl overflow-hidden mt-4">
               <div className="p-4 flex flex-col gap-2">
                 {navLinks.map((link) => (
-                  <Link
-                    key={link.id}
-                    href={link.href}
-                    onClick={() => setMenuOpen(false)}
-                    className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    {link.label}
-                  </Link>
+                  <div key={link.id}>
+                    <Link
+                      href={link.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </div>
                 ))}
                 <div className="flex items-center justify-center gap-6 pt-2 border-t border-gray-100">
-                  <User
-                    size="20"
-                    color="#3474c0"
-                    onClick={() => {
-                      handleOpenUser();
-                      setMenuOpen(false);
-                    }}
-                    className="hover:cursor-pointer hover:scale-105 duration-300"
-                  />
-                  <ShoppingCart
-                    size="20"
-                    color="#3474c0"
-                    onClick={() => {
-                      handleOpen();
-                      setMenuOpen(false);
-                    }}
-                    className="hover:cursor-pointer hover:scale-105 duration-300"
-                  />
+                  <div>
+                    <User
+                      size="20"
+                      color="#3474c0"
+                      onClick={() => {
+                        handleOpenUser();
+                        setMenuOpen(false);
+                      }}
+                      className="hover:cursor-pointer hover:scale-105 transition-transform duration-200"
+                    />
+                  </div>
+                  <div>
+                    <ShoppingCart
+                      size="20"
+                      color="#3474c0"
+                      onClick={() => {
+                        handleOpen();
+                        setMenuOpen(false);
+                      }}
+                      className="hover:cursor-pointer hover:scale-105 transition-transform duration-200"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Sidebar Modal */}
       {showCartModal && (

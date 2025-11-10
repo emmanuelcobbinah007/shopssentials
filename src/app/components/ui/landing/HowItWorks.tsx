@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { motion } from "framer-motion";
 
 const steps = [
   {
@@ -25,22 +28,32 @@ const HowItWorks: React.FC = () => {
   return (
     <div className="bg-[#F9FAFB] py-20">
       <div className="w-full md:w-[80%] md:mx-auto">
-        <div className="text-center mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
           <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-[#1A1D23]">
             How It Works
           </h2>
           <p className="text-gray-500">
             Simple steps to get your shop essentials delivered
           </p>
-        </div>
+        </motion.div>
 
         <div
           className="relative flex md:grid md:grid-cols-3 gap-8 overflow-x-auto pl-4 md:pl-0"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {steps.map((step, index) => (
-            <div
+            <motion.div
               key={step.id}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: index * 0.2 }}
+              viewport={{ once: true }}
               className="relative flex-shrink-0 w-80 md:w-auto flex flex-col items-center"
             >
               {/* Blue Circle on top */}
@@ -60,7 +73,7 @@ const HowItWorks: React.FC = () => {
               {index < steps.length - 1 && (
                 <div className="block absolute top-[55%] -right-6 w-12 h-0.5 bg-[#3474c0]"></div>
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
 

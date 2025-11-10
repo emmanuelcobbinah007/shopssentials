@@ -34,7 +34,7 @@ const leftColumnVariants = {
   visible: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.6, ease: "easeOut" },
+    transition: { duration: 0.6 },
   },
 };
 
@@ -43,7 +43,7 @@ const rightColumnVariants = {
   visible: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.6, ease: "easeOut", delay: 0.2 },
+    transition: { duration: 0.6, delay: 0.2 },
   },
 };
 
@@ -252,7 +252,7 @@ const BestSellers: React.FC = () => {
               >
                 <motion.div
                   whileHover={{ scale: 1.02, y: -5 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  transition={{ duration: 0.3 }}
                   className="bg-[#F9FAFB] rounded-2xl p-6 hover:shadow-xl hover:border hover:border-[#3474c0] transition-all duration-300 cursor-pointer"
                 >
                   <div className="flex flex-col sm:flex-row gap-6 items-center">
@@ -294,7 +294,7 @@ const BestSellers: React.FC = () => {
               >
                 <motion.div
                   whileHover={{ scale: 1.02, y: -5 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  transition={{ duration: 0.3 }}
                   className="bg-[#F9FAFB] rounded-2xl p-6 hover:shadow-xl hover:border hover:border-[#3474c0] transition-all duration-300 cursor-pointer"
                 >
                   <div className="flex flex-col sm:flex-row gap-6 items-center">
