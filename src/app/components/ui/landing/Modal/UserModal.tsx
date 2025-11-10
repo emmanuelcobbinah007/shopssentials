@@ -207,14 +207,10 @@ const UserModal: React.FC<UserModalProps> = ({ handleClose, animateModal }) => {
             <UserProfile
               onSignOut={handleSignOut}
               onMyOrders={() => changeState("myorders")}
-              onCloseModal={handleClose}
             />
           )}
           {currentState === "myorders" && (
-            <MyOrders
-              onBack={() => changeState("profile")}
-              onCloseModal={handleClose}
-            />
+            <MyOrders onCloseModal={handleClose} />
           )}
           {currentState === "forgotpassword" && (
             <ForgotPasswordForm
