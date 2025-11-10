@@ -87,7 +87,6 @@ const MyOrders: React.FC<MyOrdersProps> = ({ onBack, onCloseModal }) => {
       <div className="space-y-4">
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3474c0] mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your orders...</p>
         </div>
       </div>
     );

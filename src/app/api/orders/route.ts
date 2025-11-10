@@ -19,7 +19,7 @@ interface OrderItemWithProduct {
 
 interface OrderWithItems {
   id: string;
-  isCompleted: boolean;
+  status: string;
   createdAt: Date;
   updatedAt: Date;
   orderItems: OrderItemWithProduct[];
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
           data: {
             userId,
             storefront,
-            isCompleted: !!paymentReference, // Mark as completed if payment reference exists
+            status: "PENDING",
           },
         });
 
@@ -108,6 +108,16 @@ export async function POST(request: NextRequest) {
                 lastname: true,
                 email: true,
               },
+            },
+          },
+        });
+
+        // Clear the user's cart after successful order creation
+        await tx.cartItem.deleteMany({
+          where: {
+            cart: {
+              userId,
+              storefront: storefront as "SHOPSSENTIALS",
             },
           },
         });

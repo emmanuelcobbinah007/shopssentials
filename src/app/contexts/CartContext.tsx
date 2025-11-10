@@ -32,7 +32,7 @@ interface CartContextType extends CartState {
   addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
-  clearCart: () => void;
+  clearCart: () => Promise<void>;
   isInCart: (productId: number) => boolean;
   loadUserCart: (userId: string) => Promise<void>;
   syncCartWithServer: () => Promise<void>;
@@ -134,8 +134,31 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
     );
   };
 
-  const clearCart = () => {
-    setItems([]);
+  const clearCart = async () => {
+    if (!isAuthenticated || !user) {
+      // If not authenticated, just clear local state
+      setItems([]);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      // Clear local state immediately for better UX
+      setItems([]);
+
+      // Sync with server by sending empty cart
+      await axios.put("/api/cart/sync", {
+        userId: user.id,
+        items: [],
+      });
+    } catch (error) {
+      console.error("Error clearing cart:", error);
+      // Reload cart from server to ensure consistency
+      await loadUserCart(user.id);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const syncCartWithServer = async () => {

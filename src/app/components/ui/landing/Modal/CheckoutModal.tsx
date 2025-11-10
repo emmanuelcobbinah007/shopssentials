@@ -74,7 +74,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
           await createOrder(response.reference, verification.data.amount / 100);
 
           toast.success("Payment successful! Your order has been created.");
-          clearCart(); // Clear cart after successful order
+          await clearCart(); // Clear cart after successful order
           handleClose();
         } else {
           toast.error("Payment verification failed. Please contact support.");
