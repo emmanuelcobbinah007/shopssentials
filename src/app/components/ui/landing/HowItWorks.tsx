@@ -23,9 +23,9 @@ const steps = [
 
 const HowItWorks: React.FC = () => {
   return (
-    <div className="bg-[#F9FAFB] py-16">
-      <div className="w-[80%] mx-auto">
-        <div className="text-center mb-10">
+    <div className="bg-[#F9FAFB] py-20">
+      <div className="w-full md:w-[80%] md:mx-auto">
+        <div className="text-center mb-16">
           <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-[#1A1D23]">
             How It Works
           </h2>
@@ -34,25 +34,40 @@ const HowItWorks: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="relative flex md:grid md:grid-cols-3 gap-8 overflow-x-auto pl-4 md:pl-0">
           {steps.map((step, index) => (
-            <div key={step.id} className="relative">
-              <div className="bg-white p-8 rounded-xl shadow hover:shadow-lg transition-shadow duration-300 text-center">
-                <div className="w-16 h-16 mx-auto mb-4 bg-[#3474c0] rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                  {step.id}
-                </div>
+            <div
+              key={step.id}
+              className="relative flex-shrink-0 w-80 md:w-auto flex flex-col items-center"
+            >
+              {/* Blue Circle on top */}
+              <div className="w-16 h-16 bg-[#3474c0] rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-sm z-10 mb-[-52px]">
+                {step.id}
+              </div>
+
+              {/* Card */}
+              <div className="bg-white p-8 rounded-xl shadow hover:shadow-lg transition-shadow duration-300 text-center mt-8">
                 <h3 className="text-xl font-semibold mb-3 text-[#1A1D23]">
                   {step.title}
                 </h3>
                 <p className="text-gray-500 leading-relaxed">{step.desc}</p>
               </div>
 
-              {/* Connector line - only show between cards on md+ screens */}
+              {/* Connector line (desktop only) */}
               {index < steps.length - 1 && (
-                <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-0.5 bg-[#3474c0] transform -translate-y-1/2"></div>
+                <div className="block absolute top-[55%] -right-6 w-12 h-0.5 bg-[#3474c0]"></div>
               )}
             </div>
           ))}
+        </div>
+
+        {/* Scroll dots for mobile */}
+        <div className="md:hidden flex justify-center mt-6">
+          <div className="flex space-x-2">
+            {[1, 2, 3].map((_, i) => (
+              <div key={i} className="w-2 h-2 bg-gray-400 rounded-full"></div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
