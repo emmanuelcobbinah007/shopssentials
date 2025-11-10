@@ -37,6 +37,11 @@ export async function GET(
           },
         },
         images: true,
+        reviews: {
+          select: {
+            rating: true,
+          },
+        },
       },
     });
 
@@ -45,6 +50,14 @@ export async function GET(
     }
 
     // Transform product to match frontend expectations
+    // Calculate average rating from reviews
+    const reviewCount = product.reviews.length;
+    const averageRating =
+      reviewCount > 0
+        ? product.reviews.reduce((sum, review) => sum + review.rating, 0) /
+          reviewCount
+        : 0;
+
     const transformedProduct = {
       id: product.id,
       name: product.name,
@@ -60,8 +73,8 @@ export async function GET(
       category: product.category.name.toLowerCase().replace(/\s+/g, "-"),
       categoryName: product.category.name,
       subCategoryName: product.subCategory?.name,
-      rating: 4.5, // Default rating since we don't have ratings in schema
-      reviews: Math.floor(Math.random() * 50) + 1, // Mock reviews count
+      rating: averageRating,
+      reviews: reviewCount,
       inStock: product.stock > 0,
       isOnSale: product.salePercent > 0,
       categoryId: product.categoryId,
