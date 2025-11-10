@@ -60,17 +60,6 @@ const AboutPage: React.FC = () => {
     },
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-      },
-    },
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Spacer */}
