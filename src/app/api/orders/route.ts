@@ -35,7 +35,14 @@ interface OrderWithTotals extends OrderWithItems {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, items, storefront = "SHOPSSENTIALS" } = body;
+    const {
+      userId,
+      items,
+      storefront = "SHOPSSENTIALS",
+      shippingInfo,
+      paymentReference,
+      totalAmount,
+    } = body;
 
     // Validate required fields
     if (!userId || !items || !Array.isArray(items) || items.length === 0) {
@@ -64,6 +71,16 @@ export async function POST(request: NextRequest) {
             userId,
             storefront,
             status: "PENDING",
+            // Shipping information
+            shippingFirstName: shippingInfo?.firstName,
+            shippingLastName: shippingInfo?.lastName,
+            shippingEmail: shippingInfo?.email,
+            shippingStreetAddress: shippingInfo?.address,
+            shippingCity: shippingInfo?.city,
+            shippingPostalCode: shippingInfo?.postalCode,
+            // Payment information
+            paymentReference,
+            totalAmount,
           },
         });
 

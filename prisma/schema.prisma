@@ -193,6 +193,16 @@ model Order {
   reviews     Review[]
   userId      String      @db.Uuid
   user        User        @relation(fields: [userId], references: [id])
+  // Shipping information
+  shippingFirstName     String?
+  shippingLastName      String?
+  shippingEmail         String?
+  shippingStreetAddress String?
+  shippingCity          String?
+  shippingPostalCode    String?
+  // Payment information
+  paymentReference      String?
+  totalAmount          Float?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 }
