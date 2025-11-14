@@ -137,7 +137,10 @@ export async function GET(request: NextRequest) {
         price: `₵${product.price.toFixed(2)}`,
         originalPrice:
           product.salePercent > 0
-            ? `₵${(product.price / (1 - product.salePercent / 100)).toFixed(2)}`
+            ? `₵${(
+                product.price -
+                (product.price * product.salePercent) / 100
+              ).toFixed(2)}`
             : undefined,
         image: product.images[0]?.url || "/images/placeholder.jpg",
         description: product.descriptionShort,

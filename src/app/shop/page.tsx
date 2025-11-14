@@ -200,7 +200,7 @@ const ShopPageContent: React.FC = () => {
       e.stopPropagation();
       // Convert product to match CartContext Product interface
       const cartProduct = {
-        id: parseInt(product.id),
+        id: product.id,
         name: product.name,
         price: product.price,
         image: product.image,
@@ -268,15 +268,13 @@ const ShopPageContent: React.FC = () => {
                       <button
                         onClick={handleAddToCart}
                         className={`px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
-                          isInCart(parseInt(product.id))
+                          isInCart(product.id)
                             ? "bg-green-500 text-white hover:bg-green-600"
                             : "bg-[#3474c0] text-white hover:bg-[#2a5a9e]"
                         }`}
                       >
                         <ShoppingBag size={16} />
-                        {isInCart(parseInt(product.id))
-                          ? "Added to Cart"
-                          : "Add to Cart"}
+                        {isInCart(product.id) ? "Added to Cart" : "Add to Cart"}
                       </button>
                     ) : (
                       <button
@@ -328,13 +326,11 @@ const ShopPageContent: React.FC = () => {
             </div>
             <div className="flex items-center gap-2 md:mb-2">
               <span className="text-lg sm:text-xl font-bold text-[#3474c0]">
-                {product.price}
+                {product.originalPrice ? product.originalPrice : product.price}
               </span>
-              {product.originalPrice && (
-                <span className="text-sm text-gray-500 line-through">
-                  {product.originalPrice}
-                </span>
-              )}
+              <span className="text-sm text-gray-500 line-through">
+                {product.originalPrice ? product.originalPrice : ""}
+              </span>
             </div>
             <p className="hidden md:block text-xs sm:text-sm text-gray-600 line-clamp-2">
               {product.description}
@@ -346,13 +342,13 @@ const ShopPageContent: React.FC = () => {
             <button
               onClick={handleAddToCart}
               className={`w-full py-2 px-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
-                isInCart(parseInt(product.id))
+                isInCart(product.id)
                   ? "bg-green-500 text-white hover:bg-green-600"
                   : "bg-[#3474c0] text-white hover:bg-[#2a5a9e]"
               }`}
             >
               <ShoppingBag size={16} />
-              {isInCart(parseInt(product.id)) ? "Added to Cart" : "Add to Cart"}
+              {isInCart(product.id) ? "Added to Cart" : "Add to Cart"}
             </button>
           ) : (
             <button

@@ -10,6 +10,7 @@ interface OrderItem {
   id: string;
   quantity: number;
   size?: string;
+  priceAtTimeOfOrder: number | null;
   product: {
     id: string;
     name: string;
@@ -154,7 +155,7 @@ const MyOrders: React.FC<MyOrdersProps> = ({ onCloseModal }) => {
               </div>
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-900">
-                  {formatPrice(item.product.price)}
+                  {formatPrice(item.priceAtTimeOfOrder ?? item.product.price)}
                 </p>
                 <p className="text-xs text-gray-600">Qty: {item.quantity}</p>
               </div>

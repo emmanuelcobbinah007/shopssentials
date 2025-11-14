@@ -10,6 +10,7 @@ interface CartModalProps {
   handleClose: () => void;
   animateModal: boolean;
   onOpenUserModal?: () => void;
+  isMobileInline?: boolean;
 }
 
 interface CartModalProps {
@@ -21,6 +22,7 @@ const CartModal: React.FC<CartModalProps> = ({
   handleClose,
   animateModal,
   onOpenUserModal,
+  isMobileInline = false,
 }) => {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const {
@@ -30,7 +32,6 @@ const CartModal: React.FC<CartModalProps> = ({
     updateQuantity,
     removeFromCart,
     loadUserCart,
-    syncCartWithServer,
     isLoading: cartLoading,
   } = useCart();
   const router = useRouter();
@@ -67,26 +68,19 @@ const CartModal: React.FC<CartModalProps> = ({
     loadUserCart,
   ]);
 
-  // Reset cart initialization and sync with server when modal closes
+  // Reset cart initialization when modal closes
   useEffect(() => {
     if (!animateModal && cartInitialized) {
-      // Sync cart changes with server when modal closes
-      syncCartWithServer().catch((error) => {
-        console.error("Failed to sync cart with server:", error);
-      });
       setCartInitialized(false);
     }
-  }, [animateModal, cartInitialized, syncCartWithServer]);
+  }, [animateModal, cartInitialized]);
 
   const handleOpenCheckout = async () => {
     try {
-      // Sync cart with server before opening checkout
-      await syncCartWithServer();
       setShowCheckoutModal(true);
       setTimeout(() => setAnimateCheckoutModal(true), 10);
     } catch (error) {
-      console.error("Failed to sync cart before checkout:", error);
-      // Still open checkout even if sync fails
+      console.error("Failed to open checkout:", error);
       setShowCheckoutModal(true);
       setTimeout(() => setAnimateCheckoutModal(true), 10);
     }

@@ -8,6 +8,7 @@ interface OrderItemWithProduct {
   id: string;
   quantity: number;
   size: string | null;
+  priceAtTimeOfOrder: number | null;
   product: {
     id: string;
     name: string;
@@ -70,14 +71,29 @@ export async function POST(request: NextRequest) {
         await Promise.all(
           items.map(
             (item: { productId: string; quantity: number; size?: string }) =>
-              tx.orderItem.create({
-                data: {
-                  orderId: newOrder.id,
-                  productId: item.productId,
-                  quantity: item.quantity,
-                  size: item.size || null,
-                },
-              })
+              (async () => {
+                // Fetch product to determine the effective price at order time
+                const product = await tx.product.findUnique({
+                  where: { id: item.productId },
+                });
+
+                const effectivePrice = product
+                  ? product.salePercent > 0
+                    ? product.price -
+                      (product.price * product.salePercent) / 100
+                    : product.price
+                  : 0;
+
+                return tx.orderItem.create({
+                  data: {
+                    orderId: newOrder.id,
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    size: item.size || null,
+                    priceAtTimeOfOrder: effectivePrice,
+                  },
+                });
+              })()
           )
         );
 
@@ -180,7 +196,8 @@ export async function GET(request: NextRequest) {
         ...order,
         total: order.orderItems.reduce(
           (sum: number, item: OrderItemWithProduct) =>
-            sum + item.product.price * item.quantity,
+            sum +
+            (item.priceAtTimeOfOrder ?? item.product.price) * item.quantity,
           0
         ),
         itemCount: order.orderItems.reduce(

@@ -12,6 +12,7 @@ import { useAuth } from "@/app/contexts/AuthContext";
 interface UserModalProps {
   handleClose: () => void;
   animateModal: boolean;
+  isMobileInline?: boolean;
 }
 
 type ModalState =
@@ -21,7 +22,11 @@ type ModalState =
   | "forgotpassword"
   | "myorders";
 
-const UserModal: React.FC<UserModalProps> = ({ handleClose, animateModal }) => {
+const UserModal: React.FC<UserModalProps> = ({
+  handleClose,
+  animateModal,
+  isMobileInline = false,
+}) => {
   const { isAuthenticated, login, logout, isLoading } = useAuth();
   const [currentState, setCurrentState] = useState<ModalState>("signin");
   const [isTransitioning, setIsTransitioning] = useState(false);

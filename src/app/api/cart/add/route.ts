@@ -98,12 +98,19 @@ export async function POST(request: NextRequest) {
       });
     } else {
       // Create new cart item
+      // Calculate the price at the time of addition, considering sale
+      const effectivePrice =
+        product.salePercent > 0
+          ? product.price - (product.price * product.salePercent) / 100
+          : product.price;
+
       const newCartItem = await prisma.cartItem.create({
         data: {
           cartId: cart.id,
           productId,
           quantity,
           size,
+          priceAtTimeOfAddition: effectivePrice,
         },
         include: {
           product: {

@@ -9,6 +9,7 @@ import { useCart } from "../../contexts/CartContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { usePaystack } from "../../hooks/usePaystack";
 import { toast } from "react-toastify";
+import { Add, Minus } from "iconsax-reactjs";
 import CheckoutModal from "../../components/ui/landing/Modal/CheckoutModal";
 import ProductReviews from "../../components/ui/ProductReviews";
 
@@ -290,7 +291,7 @@ function ProductDisplay({ product }: { product: Product }) {
 
       // Add current product to cart for checkout modal
       const cartProduct = {
-        id: parseInt(product.id),
+        id: product.id,
         name: product.name,
         price: product.price,
         image: product.images?.[0] || product.image,
@@ -339,7 +340,7 @@ function ProductDisplay({ product }: { product: Product }) {
     try {
       // Transform product data to match CartContext Product interface
       const cartProduct = {
-        id: parseInt(product.id),
+        id: product.id,
         name: product.name,
         price: product.price,
         image: product.images?.[0] || product.image,
@@ -479,11 +480,13 @@ function ProductDisplay({ product }: { product: Product }) {
               <div className="border-t border-b border-gray-200 py-6">
                 <div className="flex items-center justify-between">
                   <span className="text-3xl font-bold text-[#3474c0]">
-                    {product.price}
+                    {product.originalPrice
+                      ? product.originalPrice
+                      : product.price}
                   </span>
                   {product.originalPrice && (
                     <span className="text-lg text-gray-500 line-through">
-                      {product.originalPrice}
+                      {product.price}
                     </span>
                   )}
                 </div>
@@ -505,20 +508,35 @@ function ProductDisplay({ product }: { product: Product }) {
                   >
                     Quantity:
                   </label>
-                  <select
-                    id="quantity"
-                    value={selectedQuantity}
-                    onChange={(e) =>
-                      setSelectedQuantity(Number(e.target.value))
-                    }
-                    className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#3474c0]"
-                  >
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                      <option key={num} value={num}>
-                        {num}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() =>
+                        setSelectedQuantity(Math.max(1, selectedQuantity - 1))
+                      }
+                      className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                      disabled={selectedQuantity <= 1}
+                    >
+                      <Minus
+                        size={16}
+                        color={selectedQuantity <= 1 ? "#ccc" : "#333"}
+                      />
+                    </button>
+                    <span className="w-12 text-center font-medium text-gray-900">
+                      {selectedQuantity}
+                    </span>
+                    <button
+                      onClick={() =>
+                        setSelectedQuantity(Math.min(10, selectedQuantity + 1))
+                      }
+                      className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                      disabled={selectedQuantity >= 10}
+                    >
+                      <Add
+                        size={16}
+                        color={selectedQuantity >= 10 ? "#ccc" : "#333"}
+                      />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Action Buttons */}

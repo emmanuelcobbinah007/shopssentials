@@ -10,7 +10,7 @@ import axios from "axios";
 import { useAuth } from "./AuthContext";
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   price: string;
   image: string;
@@ -30,12 +30,11 @@ interface CartState {
 
 interface CartContextType extends CartState {
   addToCart: (product: Product, quantity?: number) => void;
-  removeFromCart: (productId: number) => void;
-  updateQuantity: (productId: number, quantity: number) => void;
+  removeFromCart: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => Promise<void>;
-  isInCart: (productId: number) => boolean;
+  isInCart: (productId: string) => boolean;
   loadUserCart: (userId: string) => Promise<void>;
-  syncCartWithServer: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -99,9 +98,43 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
         return [...prevItems, { product, quantity }];
       }
     });
+
+    // Persist to database
+    axios
+      .post("/api/cart/add", {
+        userId: user.id,
+        productId: product.id,
+        quantity,
+      })
+      .catch((error) => {
+        console.error("Failed to save cart item to database:", error);
+        // Revert the optimistic update
+        setItems((prevItems) => {
+          const existingItem = prevItems.find(
+            (item) => item.product.id === product.id
+          );
+
+          if (existingItem) {
+            // If it was existing, subtract the quantity
+            const newQuantity = existingItem.quantity - quantity;
+            if (newQuantity <= 0) {
+              return prevItems.filter((item) => item.product.id !== product.id);
+            } else {
+              return prevItems.map((item) =>
+                item.product.id === product.id
+                  ? { ...item, quantity: newQuantity }
+                  : item
+              );
+            }
+          } else {
+            // If it was new, remove it
+            return prevItems.filter((item) => item.product.id !== product.id);
+          }
+        });
+      });
   };
 
-  const removeFromCart = (productId: number) => {
+  const removeFromCart = (productId: string) => {
     if (!isAuthenticated || !user) {
       throw new Error(
         "Authentication required. Please log in to remove items from your cart."
@@ -112,9 +145,18 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
     setItems((prevItems) =>
       prevItems.filter((item) => item.product.id !== productId)
     );
+
+    // Persist to database
+    axios
+      .delete("/api/cart/remove", { data: { userId: user.id, productId } })
+      .catch((error) => {
+        console.error("Failed to remove cart item from database:", error);
+        // Revert the optimistic update - need to reload cart
+        loadUserCart(user.id);
+      });
   };
 
-  const updateQuantity = (productId: number, quantity: number) => {
+  const updateQuantity = (productId: string, quantity: number) => {
     if (!isAuthenticated || !user) {
       throw new Error(
         "Authentication required. Please log in to update your cart."
@@ -132,6 +174,15 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
         item.product.id === productId ? { ...item, quantity } : item
       )
     );
+
+    // Persist to database
+    axios
+      .put("/api/cart/update", { userId: user.id, productId, quantity })
+      .catch((error) => {
+        console.error("Failed to update cart item in database:", error);
+        // Revert the optimistic update - reload cart
+        loadUserCart(user.id);
+      });
   };
 
   const clearCart = async () => {
@@ -145,12 +196,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
       setIsLoading(true);
       // Clear local state immediately for better UX
       setItems([]);
-
-      // Sync with server by sending empty cart
-      await axios.put("/api/cart/sync", {
-        userId: user.id,
-        items: [],
-      });
     } catch (error) {
       console.error("Error clearing cart:", error);
       // Reload cart from server to ensure consistency
@@ -161,34 +206,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
     }
   };
 
-  const syncCartWithServer = async () => {
-    if (!isAuthenticated || !user || items.length === 0) {
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      // Send the entire cart state to the server
-      const cartData = items.map((item) => ({
-        productId: item.product.id.toString(),
-        quantity: item.quantity,
-      }));
-
-      await axios.put("/api/cart/sync", {
-        userId: user.id,
-        items: cartData,
-      });
-    } catch (error) {
-      console.error("Error syncing cart with server:", error);
-      // Reload cart from server to ensure consistency
-      await loadUserCart(user.id);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const isInCart = (productId: number) => {
+  const isInCart = (productId: string) => {
     return items.some((item) => item.product.id === productId);
   };
 
@@ -208,12 +226,15 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
             category?: { name: string };
           };
           quantity: number;
+          priceAtTimeOfAddition: number;
         };
         return {
           product: {
             id: i.product.id,
             name: i.product.name,
-            price: `₵${i.product.price.toFixed(2)}`,
+            price: `₵${(i.priceAtTimeOfAddition || i.product.price).toFixed(
+              2
+            )}`,
             image: i.product.images?.[0]?.url || "/placeholder-image.jpg",
             category: i.product.category?.name || "General",
           },
@@ -241,7 +262,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
     clearCart,
     isInCart,
     loadUserCart,
-    syncCartWithServer,
     isLoading,
   };
 

@@ -13,6 +13,7 @@ interface OrderItem {
   id: string;
   quantity: number;
   size?: string;
+  priceAtTimeOfOrder: number | null;
   product: {
     id: string;
     name: string;
@@ -330,7 +331,11 @@ const OrdersContent: React.FC = () => {
                               </p>
                             )}
                             <p className="text-sm font-semibold text-gray-900">
-                              ₵{(item.product.price * item.quantity).toFixed(2)}
+                              ₵
+                              {(
+                                (item.priceAtTimeOfOrder ??
+                                  item.product.price) * item.quantity
+                              ).toFixed(2)}
                             </p>
                           </div>
                         </div>
@@ -354,7 +359,9 @@ const OrdersContent: React.FC = () => {
                         {order.orderItems
                           .reduce(
                             (sum, item) =>
-                              sum + item.product.price * item.quantity,
+                              sum +
+                              (item.priceAtTimeOfOrder ?? item.product.price) *
+                                item.quantity,
                             0
                           )
                           .toFixed(2)}
