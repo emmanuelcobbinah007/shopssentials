@@ -22,7 +22,7 @@ const CartModal: React.FC<CartModalProps> = ({
   handleClose,
   animateModal,
   onOpenUserModal,
-  isMobileInline: _isMobileInline = false,
+  isMobileInline: _isMobileInline = false, // eslint-disable-line @typescript-eslint/no-unused-vars
 }) => {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const {
