@@ -60,9 +60,6 @@ const Header: React.FC = () => {
   const [showUserModal, setShowUserModal] = useState(false);
   const [animateUserModal, setAnimateUserModal] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [mobileModalView, setMobileModalView] = useState<
-    "cart" | "user" | null
-  >(null);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
 
   // Logic to handle cartModal
@@ -282,7 +279,7 @@ const Header: React.FC = () => {
                       size="20"
                       color="#3474c0"
                       onClick={() => {
-                        setMobileModalView("user");
+                        handleOpenUser();
                         setMenuOpen(false);
                       }}
                       className="hover:cursor-pointer hover:scale-105 transition-transform duration-200"
@@ -293,7 +290,7 @@ const Header: React.FC = () => {
                       size="20"
                       color="#3474c0"
                       onClick={() => {
-                        setMobileModalView("cart");
+                        handleOpen();
                         setMenuOpen(false);
                       }}
                       className="hover:cursor-pointer hover:scale-105 transition-transform duration-200"

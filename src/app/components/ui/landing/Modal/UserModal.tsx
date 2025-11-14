@@ -25,7 +25,7 @@ type ModalState =
 const UserModal: React.FC<UserModalProps> = ({
   handleClose,
   animateModal,
-  isMobileInline = false,
+  isMobileInline: _isMobileInline = false,
 }) => {
   const { isAuthenticated, login, logout, isLoading } = useAuth();
   const [currentState, setCurrentState] = useState<ModalState>("signin");

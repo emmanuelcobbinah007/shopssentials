@@ -22,7 +22,7 @@ const CartModal: React.FC<CartModalProps> = ({
   handleClose,
   animateModal,
   onOpenUserModal,
-  isMobileInline = false,
+  isMobileInline: _isMobileInline = false,
 }) => {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const {
