@@ -17,6 +17,16 @@ interface HeroProps {
   } | null;
 }
 
+interface HeroContent {
+  title: string;
+  discountPercent?: number;
+  titleSuffix?: string;
+  subtitle: string;
+  buttonText: string;
+  buttonLink: string;
+  urgencyText: string | null;
+}
+
 const heroVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -43,9 +53,11 @@ const Hero = ({ activeSale }: HeroProps) => {
   const { isSearchActive } = useSearch();
 
   // Dynamic content based on active sale
-  const heroContent = activeSale
+  const heroContent: HeroContent = activeSale
     ? {
-        title: `STOREWIDE SALE - ${activeSale.discountPercent}% OFF`,
+        title: "STOREWIDE SALE - ",
+        discountPercent: activeSale.discountPercent,
+            titleSuffix: " OFF",
         subtitle: "Limited time offer on all items • Don't miss out!",
         buttonText: "Shop Sale",
         buttonLink: "/shop",
@@ -58,6 +70,8 @@ const Hero = ({ activeSale }: HeroProps) => {
         buttonLink: "/shop",
         urgencyText: null,
       };
+
+  console.log("Hero content:", heroContent);
 
   return (
     <div className="relative w-full h-[100vh]">
@@ -82,11 +96,7 @@ const Hero = ({ activeSale }: HeroProps) => {
         >
           <motion.div variants={itemVariants}>
             <div>
-              <p
-                className={`text-lg md:text-xl font-medium text-center ${
-                  activeSale ? "text-red-600 font-bold" : ""
-                }`}
-              >
+              <p className={`text-lg md:text-xl font-medium text-center`}>
                 {heroContent.subtitle}
               </p>
             </div>
@@ -94,12 +104,16 @@ const Hero = ({ activeSale }: HeroProps) => {
           <motion.div variants={itemVariants}>
             <div>
               <p
-                className={`text-2xl md:text-4xl font-bold text-center mt-4 ${
-                  activeSale ? "text-red-700" : ""
+                className={`text-2xl font-bold text-center mt-4 ${
+                  activeSale ? "md:text-5xl" : "md:text-4xl"
                 }`}
               >
                 {activeSale ? (
-                  heroContent.title
+                  <>
+                    {heroContent.title}
+                    <span className="text-[#3474c0] font-bold">{heroContent.discountPercent}%</span>
+                    {heroContent.titleSuffix}
+                  </>
                 ) : (
                   <>
                     You name it{" "}
@@ -150,11 +164,7 @@ const Hero = ({ activeSale }: HeroProps) => {
           >
             <Link href={heroContent.buttonLink}>
               <button
-                className={`my-4 inline-flex items-center gap-3 px-6 py-3 md:px-8 md:py-3 ${
-                  activeSale
-                    ? "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
-                    : "bg-gradient-to-r from-[#3474c0] to-[#4f8bd6]"
-                } text-white rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 text-base md:text-lg font-semibold focus:outline-none focus:ring-4 focus:ring-[#3474c033] hover:cursor-pointer`}
+                className={`my-4 inline-flex items-center gap-3 px-6 py-3 md:px-8 md:py-3 bg-gradient-to-r from-[#3474c0] to-[#4f8bd6] text-white rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 text-base md:text-lg font-semibold focus:outline-none focus:ring-4 focus:ring-[#3474c033] hover:cursor-pointer`}
                 aria-label={heroContent.buttonText}
               >
                 <span>{heroContent.buttonText}</span>
