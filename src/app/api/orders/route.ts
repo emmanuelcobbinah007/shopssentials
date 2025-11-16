@@ -3,6 +3,62 @@ import { PrismaClient, Prisma } from "@/generated/prisma";
 
 const prisma = new PrismaClient();
 
+// Helper function to validate promo code
+async function validatePromoCode(
+  code: string,
+  userId: string,
+  storefront: string,
+  subtotal: number
+): Promise<{
+  valid: boolean;
+  error?: string;
+  discountAmount?: number;
+  promoCode?: Prisma.PromoCodeGetPayload<{}>;
+}> {
+  const promoCode = await prisma.promoCode.findFirst({
+    where: {
+      code: code.toUpperCase(),
+      storefront: storefront as "SHOPSSENTIALS",
+      isActive: true,
+    },
+    include: {
+      usages: true,
+    },
+  });
+
+  if (!promoCode) {
+    return { valid: false, error: "Invalid promo code" };
+  }
+
+  if (promoCode.expiresAt && new Date() > promoCode.expiresAt) {
+    return { valid: false, error: "Promo code has expired" };
+  }
+
+  if (promoCode.usageLimit && promoCode.usages.length >= promoCode.usageLimit) {
+    return { valid: false, error: "Promo code usage limit exceeded" };
+  }
+
+  const userUsages = promoCode.usages.filter(
+    (usage) => usage.userId === userId
+  );
+  if (promoCode.perUserLimit && userUsages.length >= promoCode.perUserLimit) {
+    return { valid: false, error: "Promo code per-user limit exceeded" };
+  }
+
+  let discountAmount = 0;
+  if (promoCode.discountType === "PERCENTAGE") {
+    discountAmount = (promoCode.discountValue / 100) * subtotal;
+  } else if (promoCode.discountType === "FIXED") {
+    discountAmount = Math.min(promoCode.discountValue, subtotal);
+  }
+
+  return {
+    valid: true,
+    discountAmount,
+    promoCode,
+  };
+}
+
 // Types for the API responses
 interface OrderItemWithProduct {
   id: string;
@@ -41,7 +97,7 @@ export async function POST(request: NextRequest) {
       storefront = "SHOPSSENTIALS",
       shippingInfo,
       paymentReference,
-      totalAmount,
+      promoCode,
     } = body;
 
     // Validate required fields
@@ -62,7 +118,71 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Start a transaction to ensure data consistency
+    // Calculate subtotal and handle promo code
+    let subtotal = 0;
+    let discountAmount = 0;
+    let promoCodeRecord = null;
+
+    // Fetch all products at once to avoid multiple queries
+    const productIds = items.map((item) => item.productId);
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+      include: {
+        images: true,
+        category: true,
+        subCategory: true,
+      },
+    });
+
+    // Fetch user data for the response
+    const userData = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        firstname: true,
+        lastname: true,
+        email: true,
+      },
+    });
+
+    // Create a map for quick lookup
+    const productMap = new Map(products.map((p) => [p.id, p]));
+
+    // Validate all products exist and calculate subtotal
+    for (const item of items) {
+      const product = productMap.get(item.productId);
+      if (!product) {
+        return NextResponse.json(
+          { error: `Product ${item.productId} not found` },
+          { status: 400 }
+        );
+      }
+      const effectivePrice =
+        product.salePercent > 0
+          ? product.price - (product.price * product.salePercent) / 100
+          : product.price;
+      subtotal += effectivePrice * item.quantity;
+    }
+
+    // Validate promo code if provided
+    if (promoCode) {
+      const promoValidation = await validatePromoCode(
+        promoCode,
+        userId,
+        storefront,
+        subtotal
+      );
+      if (!promoValidation.valid) {
+        return NextResponse.json(
+          { error: promoValidation.error },
+          { status: 400 }
+        );
+      }
+      discountAmount = promoValidation.discountAmount || 0;
+      promoCodeRecord = promoValidation.promoCode;
+    }
+
+    const finalTotal = subtotal - discountAmount;
     const order = await prisma.$transaction(
       async (tx: Prisma.TransactionClient) => {
         // Create the order
@@ -80,7 +200,7 @@ export async function POST(request: NextRequest) {
             shippingPostalCode: shippingInfo?.postalCode,
             // Payment information
             paymentReference,
-            totalAmount,
+            totalAmount: finalTotal,
           },
         });
 
@@ -89,17 +209,14 @@ export async function POST(request: NextRequest) {
           items.map(
             (item: { productId: string; quantity: number; size?: string }) =>
               (async () => {
-                // Fetch product to determine the effective price at order time
-                const product = await tx.product.findUnique({
-                  where: { id: item.productId },
-                });
+                // Use product from the map (already fetched outside transaction)
+                const product = productMap.get(item.productId)!; // We know it exists from validation above
 
-                const effectivePrice = product
-                  ? product.salePercent > 0
+                const effectivePrice =
+                  product.salePercent > 0
                     ? product.price -
                       (product.price * product.salePercent) / 100
-                    : product.price
-                  : 0;
+                    : product.price;
 
                 return tx.orderItem.create({
                   data: {
@@ -114,31 +231,17 @@ export async function POST(request: NextRequest) {
           )
         );
 
-        // Fetch the complete order with items and product details
-        const completeOrder = await tx.order.findUnique({
-          where: { id: newOrder.id },
-          include: {
-            orderItems: {
-              include: {
-                product: {
-                  include: {
-                    images: true,
-                    category: true,
-                    subCategory: true,
-                  },
-                },
-              },
+        // Create promo code usage if applicable
+        if (promoCodeRecord) {
+          await tx.promoCodeUsage.create({
+            data: {
+              promoCodeId: promoCodeRecord.id,
+              userId,
+              orderId: newOrder.id,
+              discountApplied: discountAmount,
             },
-            user: {
-              select: {
-                id: true,
-                firstname: true,
-                lastname: true,
-                email: true,
-              },
-            },
-          },
-        });
+          });
+        }
 
         // Clear the user's cart after successful order creation
         await tx.cartItem.deleteMany({
@@ -149,6 +252,41 @@ export async function POST(request: NextRequest) {
             },
           },
         });
+
+        // Build the complete order object manually to avoid expensive query
+        const orderItemsWithProducts = items.map((item, index) => {
+          const product = productMap.get(item.productId)!;
+          const effectivePrice =
+            product.salePercent > 0
+              ? product.price - (product.price * product.salePercent) / 100
+              : product.price;
+
+          return {
+            id: `temp-${index}`, // Temporary ID since we don't have the real one yet
+            quantity: item.quantity,
+            size: item.size || null,
+            priceAtTimeOfOrder: effectivePrice,
+            product: {
+              id: product.id,
+              name: product.name,
+              price: product.price,
+              images: product.images,
+              category: product.category,
+              subCategory: product.subCategory,
+            },
+          };
+        });
+
+        const completeOrder = {
+          ...newOrder,
+          orderItems: orderItemsWithProducts,
+          user: userData || {
+            id: userId,
+            firstname: "",
+            lastname: "",
+            email: "",
+          },
+        };
 
         return completeOrder;
       }
@@ -177,6 +315,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
     const storefront = searchParams.get("storefront") || "SHOPSSENTIALS";
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
 
     if (!userId) {
       return NextResponse.json(
@@ -184,6 +324,17 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+
+    // Get total count for pagination
+    const totalCount = await prisma.order.count({
+      where: {
+        userId,
+        storefront: storefront as "SHOPSSENTIALS",
+      },
+    });
 
     const orders = await prisma.order.findMany({
       where: {
@@ -205,6 +356,8 @@ export async function GET(request: NextRequest) {
       orderBy: {
         createdAt: "desc",
       },
+      skip,
+      take: limit,
     });
 
     // Transform the orders to include calculated totals
@@ -227,6 +380,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       orders: ordersWithTotals,
+      pagination: {
+        page,
+        limit,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+      },
     });
   } catch (error) {
     console.error("Error fetching orders:", error);

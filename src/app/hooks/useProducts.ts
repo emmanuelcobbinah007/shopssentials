@@ -46,6 +46,8 @@ interface ProductsFilters {
   inStock?: boolean;
   search?: string;
   sortBy?: string;
+  page?: number;
+  limit?: number;
 }
 
 // Fetch all categories
@@ -64,7 +66,16 @@ export const useCategories = () => {
 export const useProducts = (filters: ProductsFilters = {}) => {
   return useQuery({
     queryKey: ["products", filters],
-    queryFn: async (): Promise<{ products: Product[]; total: number }> => {
+    queryFn: async (): Promise<{
+      products: Product[];
+      total: number;
+      pagination: {
+        page: number;
+        limit: number;
+        totalPages: number;
+        totalCount: number;
+      };
+    }> => {
       const params = new URLSearchParams();
 
       if (filters.categoryId && filters.categoryId !== "all") {
@@ -87,6 +98,12 @@ export const useProducts = (filters: ProductsFilters = {}) => {
       }
       if (filters.sortBy) {
         params.append("sortBy", filters.sortBy);
+      }
+      if (filters.page && filters.page > 0) {
+        params.append("page", filters.page.toString());
+      }
+      if (filters.limit && filters.limit > 0) {
+        params.append("limit", filters.limit.toString());
       }
 
       const response = await axios.get(`/api/products?${params}`);

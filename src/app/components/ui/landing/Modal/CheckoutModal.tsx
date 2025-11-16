@@ -31,6 +31,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     postalCode: "",
   });
 
+  const [promoCode, setPromoCode] = useState("");
+  const [discount, setDiscount] = useState(0);
+  const [promoError, setPromoError] = useState("");
+  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
+
   // Keep shippingInfo in sync with authenticated user when it becomes available.
   React.useEffect(() => {
     console.log("CheckoutModal: user changed:", user);
@@ -108,6 +113,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
         paymentReference,
         totalAmount: paidAmount,
         storefront: "SHOPSSENTIALS",
+        promoCode: promoCode.trim() || undefined,
       });
 
       if (response.data.success) {
@@ -169,7 +175,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
     try {
       const reference = generateReference();
-      const amountInKobo = toKobo(total);
+      const amountInKobo = toKobo(discountedTotal);
 
       initializePayment({
         email: shippingInfo.email,
@@ -222,6 +228,46 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
       maximumFractionDigits: 2,
     })}`;
   };
+
+  const validatePromoCode = async () => {
+    if (!promoCode.trim()) {
+      setPromoError("Please enter a promo code");
+      return;
+    }
+
+    setIsValidatingPromo(true);
+    setPromoError("");
+
+    try {
+      const response = await axios.post("/api/promo-codes/validate", {
+        code: promoCode.trim(),
+        userId: user?.id,
+        storefront: "SHOPSSENTIALS",
+        subtotal: total,
+      });
+
+      if (response.data.valid) {
+        setDiscount(response.data.discountAmount);
+        setPromoError("");
+        toast.success(
+          `Promo code applied! You saved ${formatPrice(
+            response.data.discountAmount
+          )}`
+        );
+      } else {
+        setDiscount(0);
+        setPromoError(response.data.error);
+      }
+    } catch (error) {
+      console.error("Error validating promo code:", error);
+      setDiscount(0);
+      setPromoError("Failed to validate promo code");
+    } finally {
+      setIsValidatingPromo(false);
+    }
+  };
+
+  const discountedTotal = total - discount;
 
   return (
     <div className="fixed inset-0 z-[60] flex font-poppins">
@@ -291,11 +337,79 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
               ))}
             </div>
             <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="flex justify-between items-center text-lg font-semibold">
+              <div className="flex justify-between items-center text-sm">
+                <span>Subtotal:</span>
+                <span>{formatPrice(total)}</span>
+              </div>
+              {discount > 0 && (
+                <div className="flex justify-between items-center text-sm text-green-600">
+                  <span>Discount:</span>
+                  <span>-{formatPrice(discount)}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center text-lg font-semibold mt-2">
                 <span>Total:</span>
-                <span className="text-[#3474c0]">{formatPrice(total)}</span>
+                <span className="text-[#3474c0]">
+                  {formatPrice(discountedTotal)}
+                </span>
               </div>
             </div>
+          </div>
+
+          {/* Promo Code Section */}
+          <div className="mb-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Promo Code
+            </h3>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={promoCode}
+                onChange={(e) => {
+                  setPromoCode(e.target.value.toUpperCase());
+                  if (discount > 0) {
+                    setDiscount(0);
+                    setPromoError("");
+                  }
+                }}
+                placeholder="Enter promo code"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3474c0] focus:border-transparent uppercase"
+                disabled={isValidatingPromo}
+              />
+              <button
+                type="button"
+                onClick={validatePromoCode}
+                disabled={isValidatingPromo || !promoCode.trim()}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  isValidatingPromo || !promoCode.trim()
+                    ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                    : "bg-[#3474c0] text-white hover:bg-[#2a5a9e]"
+                }`}
+              >
+                {isValidatingPromo ? "Validating..." : "Apply"}
+              </button>
+              {discount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPromoCode("");
+                    setDiscount(0);
+                    setPromoError("");
+                  }}
+                  className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                >
+                  Remove
+                </button>
+              )}
+            </div>
+            {promoError && (
+              <p className="text-red-600 text-sm mt-2">{promoError}</p>
+            )}
+            {discount > 0 && (
+              <p className="text-green-600 text-sm mt-2">
+                Promo code applied! You saved {formatPrice(discount)}.
+              </p>
+            )}
           </div>
 
           {/* Checkout Form */}
@@ -482,7 +596,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   Loading Payment System...
                 </div>
               ) : (
-                `Pay Now - ${formatPrice(total)}`
+                `Pay Now - ${formatPrice(discountedTotal)}`
               )}
             </button>
           </form>

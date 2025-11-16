@@ -5,9 +5,9 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
-  output   = "../src/generated/prisma"
+  output          = "../src/generated/prisma"
 }
 
 datasource db {
@@ -32,7 +32,7 @@ enum UserRole {
 
 enum Storefront {
   LORACE
-  LYLA  
+  LYLA
   SHOPSSENTIALS
   ThreeLs
   ALL
@@ -45,10 +45,15 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
 model Review {
   id        String   @id @default(uuid()) @db.Uuid
-  rating    Int      // 1-5 star rating
-  comment   String?  // Optional review comment
+  rating    Int // 1-5 star rating
+  comment   String? // Optional review comment
   userId    String   @db.Uuid
   user      User     @relation(fields: [userId], references: [id])
   productId String   @db.Uuid
@@ -62,137 +67,140 @@ model Review {
 }
 
 model User {
-  id        String    @id @default(uuid()) @db.Uuid
-  firstname String
-  lastname  String
-  email     String
-  phone     String
-  password  String
-  role      UserRole    @default(USER)
-  storefront Storefront? @default(LORACE)
-  emailIsVerified        Boolean  @default(false)
-  emailVerificationToken String?
-  phoneIsVerified        Boolean  @default(false)
-  phoneVerificationToken String?
-  passwordResetToken     String?
+  id                       String           @id @default(uuid()) @db.Uuid
+  firstname                String
+  lastname                 String
+  email                    String
+  phone                    String
+  password                 String
+  role                     UserRole         @default(USER)
+  storefront               Storefront?      @default(LORACE)
+  emailIsVerified          Boolean          @default(false)
+  emailVerificationToken   String?
+  phoneIsVerified          Boolean          @default(false)
+  phoneVerificationToken   String?
+  passwordResetToken       String?
   passwordResetTokenExpiry DateTime?
-  createdAt DateTime  @default(now())
-  carts      Cart[]
-  orders    Order[]
-  reviews   Review[]
-  emailList EmailList[]
+  createdAt                DateTime         @default(now())
+  carts                    Cart[]
+  orders                   Order[]
+  reviews                  Review[]
+  emailList                EmailList[]
+  promoCodeUsages          PromoCodeUsage[]
 
-  @@unique([email, storefront]) 
+  @@unique([email, storefront])
 }
 
 model Category {
-  id        String    @id @default(uuid()) @db.Uuid
-  name      String
-  products  Product[]
-  storefront       Storefront?     @default(LORACE)
+  id            String        @id @default(uuid()) @db.Uuid
+  name          String
+  products      Product[]
+  storefront    Storefront?   @default(LORACE)
   subCategories SubCategory[]
-  createdAt DateTime  @default(now())
+  createdAt     DateTime      @default(now())
+
   @@unique([name, storefront])
 }
 
 model SubCategory {
-  id          String      @id @default(uuid()) @db.Uuid
-  name        String
-  isHidden    Boolean     @default(false)
-  storefront  Storefront? @default(LORACE)
-  categoryId  String      @db.Uuid
-  category    Category    @relation(fields: [categoryId], references: [id])
-  products    Product[] 
-  createdAt   DateTime    @default(now())
+  id         String      @id @default(uuid()) @db.Uuid
+  name       String
+  isHidden   Boolean     @default(false)
+  storefront Storefront? @default(LORACE)
+  categoryId String      @db.Uuid
+  category   Category    @relation(fields: [categoryId], references: [id])
+  products   Product[]
+  createdAt  DateTime    @default(now())
 
-  @@unique([name, categoryId, storefront]) 
+  @@unique([name, categoryId, storefront])
 }
 
 model Product {
-  id               String         @id @default(uuid()) @db.Uuid
+  id               String           @id @default(uuid()) @db.Uuid
   name             String
   descriptionShort String
   descriptionLong  String
   price            Float
   stock            Int
-  isHidden         Boolean        @default(false)
+  isHidden         Boolean          @default(false)
   sizingType       SizingType
-  storefront       Storefront?    @default(LORACE)
-  categoryId       String         @db.Uuid
-  category         Category       @relation(fields: [categoryId], references: [id])
-  subCategoryId    String?        @db.Uuid
-  subCategory      SubCategory?   @relation(fields: [subCategoryId], references: [id])
+  storefront       Storefront?      @default(LORACE)
+  categoryId       String           @db.Uuid
+  category         Category         @relation(fields: [categoryId], references: [id])
+  subCategoryId    String?          @db.Uuid
+  subCategory      SubCategory?     @relation(fields: [subCategoryId], references: [id])
   featuredProduct  FeaturedProduct?
   cartItems        CartItem[]
   orderItems       OrderItem[]
   reviews          Review[]
-  salePercent      Float          @default(0.0)
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  salePercent      Float            @default(0.0)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
   images           ProductImage[]
 }
 
 model ProductImage {
-  id        String   @id @default(uuid()) @db.Uuid
+  id        String  @id @default(uuid()) @db.Uuid
   url       String
-  product   Product  @relation(fields: [productId], references: [id])
-  productId String   @db.Uuid
+  product   Product @relation(fields: [productId], references: [id])
+  productId String  @db.Uuid
 }
 
 model EmailList {
-  id          String     @id @default(uuid()) @db.Uuid
-  email       String
-  storefront  Storefront? @default(LORACE)
-  userId      String?    @db.Uuid
-  user        User?      @relation(fields: [userId], references: [id])
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id         String      @id @default(uuid()) @db.Uuid
+  email      String
+  storefront Storefront? @default(LORACE)
+  userId     String?     @db.Uuid
+  user       User?       @relation(fields: [userId], references: [id])
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
   @@unique([email, storefront])
 }
 
 model FeaturedProduct {
-  id            String      @id @default(uuid()) @db.Uuid
-  productId     String      @unique @db.Uuid
-  storefront    Storefront? @default(LORACE)
-  product       Product     @relation(fields: [productId], references: [id])
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id         String      @id @default(uuid()) @db.Uuid
+  productId  String      @unique @db.Uuid
+  storefront Storefront? @default(LORACE)
+  product    Product     @relation(fields: [productId], references: [id])
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 }
 
 model Cart {
-  id          String      @id @default(uuid()) @db.Uuid
-  userId      String      @db.Uuid
-  storefront  Storefront? @default(LORACE)
-  user        User        @relation(fields: [userId], references: [id])
-  cartItems   CartItem[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id         String      @id @default(uuid()) @db.Uuid
+  userId     String      @db.Uuid
+  storefront Storefront? @default(LORACE)
+  user       User        @relation(fields: [userId], references: [id])
+  cartItems  CartItem[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
   @@unique([userId, storefront])
 }
 
 model CartItem {
-  id          String    @id @default(uuid()) @db.Uuid
-  quantity    Int       @default(1)
-  size        String?
-  priceAtTimeOfAddition Float? @default(0.00)
-  cartId      String    @db.Uuid
-  cart        Cart      @relation(fields: [cartId], references: [id])
-  productId   String    @db.Uuid
-  product     Product   @relation(fields: [productId], references: [id])
-  createdAt   DateTime  @default(now())
-  updatedAt DateTime @updatedAt
+  id                    String   @id @default(uuid()) @db.Uuid
+  quantity              Int      @default(1)
+  size                  String?
+  priceAtTimeOfAddition Float?   @default(0.00)
+  cartId                String   @db.Uuid
+  cart                  Cart     @relation(fields: [cartId], references: [id])
+  productId             String   @db.Uuid
+  product               Product  @relation(fields: [productId], references: [id])
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }
 
 model Order {
-  id          String      @id @default(uuid()) @db.Uuid
-  status      OrderStatus @default(PENDING)
-  storefront  Storefront? @default(LORACE)
-  orderItems  OrderItem[]
-  reviews     Review[]
-  userId      String      @db.Uuid
-  user        User        @relation(fields: [userId], references: [id])
+  id                    String           @id @default(uuid()) @db.Uuid
+  status                OrderStatus      @default(PENDING)
+  storefront            Storefront?      @default(LORACE)
+  orderItems            OrderItem[]
+  reviews               Review[]
+  promoCodeUsages       PromoCodeUsage[]
+  userId                String           @db.Uuid
+  user                  User             @relation(fields: [userId], references: [id])
   // Shipping information
   shippingFirstName     String?
   shippingLastName      String?
@@ -202,20 +210,58 @@ model Order {
   shippingPostalCode    String?
   // Payment information
   paymentReference      String?
-  totalAmount          Float?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  totalAmount           Float?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
 }
 
 model OrderItem {
-  id          String    @id @default(uuid()) @db.Uuid
-  quantity    Int       @default(1)
-  size        String?   
-  orderId     String    @db.Uuid
-  order       Order     @relation(fields: [orderId], references: [id])
-  productId   String    @db.Uuid
-  product     Product   @relation(fields: [productId], references: [id])
-  priceAtTimeOfOrder Float? @default(0.00)
-  createdAt   DateTime  @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String   @id @default(uuid()) @db.Uuid
+  quantity           Int      @default(1)
+  size               String?
+  orderId            String   @db.Uuid
+  order              Order    @relation(fields: [orderId], references: [id])
+  productId          String   @db.Uuid
+  product            Product  @relation(fields: [productId], references: [id])
+  priceAtTimeOfOrder Float?   @default(0.00)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model StorewideSale {
+  id              String     @id @default(uuid()) @db.Uuid
+  storefront      Storefront @unique
+  isActive        Boolean    @default(false)
+  discountPercent Float      @default(0.0)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model PromoCode {
+  id            String           @id @default(uuid()) @db.Uuid
+  code          String           @unique
+  discountType  DiscountType
+  discountValue Float
+  isActive      Boolean          @default(true)
+  usageLimit    Int?
+  perUserLimit  Int?
+  expiresAt     DateTime?
+  storefront    Storefront?      @default(LORACE)
+  usages        PromoCodeUsage[]
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+model PromoCodeUsage {
+  id              String    @id @default(uuid()) @db.Uuid
+  promoCodeId     String    @db.Uuid
+  promoCode       PromoCode @relation(fields: [promoCodeId], references: [id])
+  userId          String    @db.Uuid
+  user            User      @relation(fields: [userId], references: [id])
+  orderId         String?   @db.Uuid
+  order           Order?    @relation(fields: [orderId], references: [id])
+  discountApplied Float
+  usedAt          DateTime  @default(now())
+
+  @@unique([promoCodeId, userId, orderId])
 }

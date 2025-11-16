@@ -41,6 +41,7 @@ const ShopPageContent: React.FC = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const [currentFilters, setCurrentFilters] = useState({
     categoryId: "all",
     subCategoryId: "all",
@@ -57,9 +58,17 @@ const ShopPageContent: React.FC = () => {
   const { data, isLoading } = useProducts({
     ...currentFilters,
     sortBy,
+    page: currentPage,
+    limit: 20, // Show 20 products per page
   });
 
   const products = data?.products || [];
+  const pagination = data?.pagination;
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [currentFilters, sortBy]);
 
   // Set initial filter from URL parameters
   useEffect(() => {
@@ -551,12 +560,89 @@ const ShopPageContent: React.FC = () => {
                     };
                     setCurrentFilters(resetFilters);
                     setSortBy("name");
+                    setCurrentPage(1);
                     // Also clear URL parameters
                     window.history.pushState({}, "", "/shop");
                   }}
                   className="bg-[#3474c0] text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-[#4f8bd6] transition-colors text-sm sm:text-base"
                 >
                   Clear Filters
+                </button>
+              </div>
+            )}
+
+            {/* Pagination */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className="flex justify-center items-center mt-8 space-x-2">
+                <button
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+
+                {/* Page numbers */}
+                {Array.from(
+                  { length: Math.min(5, pagination.totalPages) },
+                  (_, i) => {
+                    const pageNum =
+                      Math.max(
+                        1,
+                        Math.min(pagination.totalPages - 4, currentPage - 2)
+                      ) + i;
+                    if (pageNum > pagination.totalPages) return null;
+
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`px-3 py-2 rounded-lg border transition-colors ${
+                          currentPage === pageNum
+                            ? "bg-[#3474c0] text-white border-[#3474c0]"
+                            : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  }
+                )}
+
+                <button
+                  onClick={() =>
+                    setCurrentPage(
+                      Math.min(pagination.totalPages, currentPage + 1)
+                    )
+                  }
+                  disabled={currentPage === pagination.totalPages}
+                  className="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
                 </button>
               </div>
             )}

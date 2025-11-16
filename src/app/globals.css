@@ -4,6 +4,15 @@ body {
   font-family: "Poppins", sans-serif;
 }
 
+/* Hide scrollbars globally */
+::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  scrollbar-width: none;
+}
+
 /* Shimmer animation for loading images */
 @keyframes shimmer {
   0% {

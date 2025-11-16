@@ -71,60 +71,71 @@ const OrdersContent: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const [reviewModalOrder, setReviewModalOrder] = useState<Order | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState<{
+    page: number;
+    limit: number;
+    totalCount: number;
+    totalPages: number;
+  } | null>(null);
 
-  const fetchOrders = useCallback(async () => {
-    if (!user?.id) return;
+  const fetchOrders = useCallback(
+    async (page: number = 1) => {
+      if (!user?.id) return;
 
-    try {
-      setLoading(true);
-      const response = await axios.get(
-        `/api/orders?userId=${user.id}&storefront=SHOPSSENTIALS`
-      );
-
-      if (response.data.success) {
-        const ordersWithReviewStatus = await Promise.all(
-          response.data.orders.map(async (order: Order) => {
-            if (order.status === "COMPLETED") {
-              try {
-                const token =
-                  localStorage.getItem("token") ||
-                  localStorage.getItem("accessToken");
-                const reviewResponse = await axios.get(
-                  `/api/reviews/check?orderId=${order.id}`,
-                  {
-                    headers: {
-                      Authorization: `Bearer ${token}`,
-                    },
-                  }
-                );
-                return {
-                  ...order,
-                  hasReviewed: reviewResponse.data.hasReviewedAll,
-                };
-              } catch (error) {
-                console.error("Error checking review status:", error);
-                return { ...order, hasReviewed: false };
-              }
-            }
-            return order;
-          })
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          `/api/orders?userId=${user.id}&storefront=SHOPSSENTIALS&page=${page}&limit=10`
         );
-        setOrders(ordersWithReviewStatus);
+
+        if (response.data.success) {
+          const ordersWithReviewStatus = await Promise.all(
+            response.data.orders.map(async (order: Order) => {
+              if (order.status === "COMPLETED") {
+                try {
+                  const token =
+                    localStorage.getItem("token") ||
+                    localStorage.getItem("accessToken");
+                  const reviewResponse = await axios.get(
+                    `/api/reviews/check?orderId=${order.id}`,
+                    {
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    }
+                  );
+                  return {
+                    ...order,
+                    hasReviewed: reviewResponse.data.hasReviewedAll,
+                  };
+                } catch (error) {
+                  console.error("Error checking review status:", error);
+                  return { ...order, hasReviewed: false };
+                }
+              }
+              return order;
+            })
+          );
+          setOrders(ordersWithReviewStatus);
+          setPagination(response.data.pagination);
+        }
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        toast.error("Failed to load orders");
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      toast.error("Failed to load orders");
-    } finally {
-      setLoading(false);
-    }
-  }, [user?.id]);
+    },
+    [user?.id]
+  );
 
   const handleReviewOrder = (order: Order) => {
     setReviewModalOrder(order);
   };
 
   const handleReviewsSubmitted = () => {
-    fetchOrders(); // Refresh orders to update review status
+    fetchOrders(currentPage); // Refresh orders to update review status
   };
 
   const handleReorderItems = (order: Order) => {
@@ -144,12 +155,12 @@ const OrdersContent: React.FC = () => {
 
     // Only fetch orders if user is authenticated
     if (isAuthenticated && user) {
-      fetchOrders();
+      fetchOrders(currentPage);
     } else {
       // If not authenticated, just set loading to false
       setLoading(false);
     }
-  }, [user, isAuthenticated, authLoading, fetchOrders]);
+  }, [user, isAuthenticated, authLoading, fetchOrders, currentPage]);
 
   if (authLoading || loading) {
     return (
@@ -409,6 +420,80 @@ const OrdersContent: React.FC = () => {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {pagination && pagination.totalPages > 1 && (
+          <div className="flex justify-center items-center mt-8 space-x-2">
+            <button
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+
+            {/* Page numbers */}
+            {Array.from(
+              { length: Math.min(5, pagination.totalPages) },
+              (_, i) => {
+                const pageNum =
+                  Math.max(
+                    1,
+                    Math.min(pagination.totalPages - 4, currentPage - 2)
+                  ) + i;
+                if (pageNum > pagination.totalPages) return null;
+
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`px-3 py-2 rounded-lg border transition-colors ${
+                      currentPage === pageNum
+                        ? "bg-[#3474c0] text-white border-[#3474c0]"
+                        : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              }
+            )}
+
+            <button
+              onClick={() =>
+                setCurrentPage(Math.min(pagination.totalPages, currentPage + 1))
+              }
+              disabled={currentPage === pagination.totalPages}
+              className="px-3 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
           </div>
         )}
       </div>
