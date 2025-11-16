@@ -10,7 +10,12 @@ export async function GET(request: NextRequest) {
 
     const storewideSale = await prisma.storewideSale.findFirst({
       where: {
-        storefront: storefront as any, // Will be fixed with proper enum import
+        storefront: storefront as
+          | "SHOPSSENTIALS"
+          | "LORACE"
+          | "LYLA"
+          | "ThreeLs"
+          | "ALL",
         isActive: true,
       },
     });

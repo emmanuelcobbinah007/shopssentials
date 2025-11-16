@@ -13,16 +13,26 @@ const poppins = Poppins({
   variable: "--font-poppins",
 });
 
-const page = () => {
+// Client component that handles the storewide sale logic
+function HomePageContent() {
+  // This will be implemented as a client component
   return (
-    <div
-      className={`${poppins.variable} font-poppins text-[#1A1D23] bg-[#FEFFFE]`}
-    >
+    <>
       <Hero />
       <FeaturedCategories />
       <BestSellers />
       <HowItWorks />
       <Newsletter />
+    </>
+  );
+}
+
+const page = () => {
+  return (
+    <div
+      className={`${poppins.variable} font-poppins text-[#1A1D23] bg-[#FEFFFE]`}
+    >
+      <HomePageContent />
     </div>
   );
 };

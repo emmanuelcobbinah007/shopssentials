@@ -134,14 +134,14 @@ export async function GET(request: NextRequest) {
       return {
         id: product.id,
         name: product.name,
-        price: `₵${product.price.toFixed(2)}`,
-        originalPrice:
+        price:
           product.salePercent > 0
             ? `₵${(
                 product.price -
                 (product.price * product.salePercent) / 100
               ).toFixed(2)}`
             : undefined,
+        originalPrice: `₵${product.price.toFixed(2)}`,
         image: product.images[0]?.url || "/images/placeholder.jpg",
         description: product.descriptionShort,
         category: product.category.name.toLowerCase().replace(/\s+/g, "-"),

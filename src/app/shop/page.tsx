@@ -65,6 +65,10 @@ const ShopPageContent: React.FC = () => {
   const products = data?.products || [];
   const pagination = data?.pagination;
 
+  // Log the products returned from the API
+  console.log("Products from API:", products);
+  console.log("Pagination info:", pagination);
+
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
@@ -262,11 +266,17 @@ const ShopPageContent: React.FC = () => {
                       {product.description}
                     </p>
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="text-xl font-bold text-[#3474c0]">
-                        {product.price}
-                      </span>
-                      {product.originalPrice && (
-                        <span className="text-lg text-gray-500 line-through">
+                      {product.price ? (
+                        <>
+                          <span className="text-xl font-bold text-[#3474c0]">
+                            {product.price}
+                          </span>
+                          <span className="text-lg text-gray-500 line-through">
+                            {product.originalPrice}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-xl font-bold text-[#3474c0]">
                           {product.originalPrice}
                         </span>
                       )}
@@ -334,12 +344,20 @@ const ShopPageContent: React.FC = () => {
               <span className="text-xs text-gray-500">({product.reviews})</span>
             </div>
             <div className="flex items-center gap-2 md:mb-2">
-              <span className="text-lg sm:text-xl font-bold text-[#3474c0]">
-                {product.originalPrice ? product.originalPrice : product.price}
-              </span>
-              <span className="text-sm text-gray-500 line-through">
-                {product.originalPrice ? product.originalPrice : ""}
-              </span>
+              {product.price ? (
+                <>
+                  <span className="text-xl font-bold text-[#3474c0]">
+                    {product.price}
+                  </span>
+                  <span className="text-lg text-gray-500 line-through">
+                    {product.originalPrice}
+                  </span>
+                </>
+              ) : (
+                <span className="text-xl font-bold text-[#3474c0]">
+                  {product.originalPrice}
+                </span>
+              )}
             </div>
             <p className="hidden md:block text-xs sm:text-sm text-gray-600 line-clamp-2">
               {product.description}
