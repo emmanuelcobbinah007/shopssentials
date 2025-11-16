@@ -57,7 +57,7 @@ const Hero = ({ activeSale }: HeroProps) => {
     ? {
         title: "STOREWIDE SALE - ",
         discountPercent: activeSale.discountPercent,
-            titleSuffix: " OFF",
+        titleSuffix: " OFF",
         subtitle: "Limited time offer on all items • Don't miss out!",
         buttonText: "Shop Sale",
         buttonLink: "/shop",
@@ -111,7 +111,9 @@ const Hero = ({ activeSale }: HeroProps) => {
                 {activeSale ? (
                   <>
                     {heroContent.title}
-                    <span className="text-[#3474c0] font-bold">{heroContent.discountPercent}%</span>
+                    <span className="text-[#3474c0] font-bold">
+                      {heroContent.discountPercent}%
+                    </span>
                     {heroContent.titleSuffix}
                   </>
                 ) : (

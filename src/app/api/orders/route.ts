@@ -13,7 +13,7 @@ async function validatePromoCode(
   valid: boolean;
   error?: string;
   discountAmount?: number;
-  promoCode?: Prisma.PromoCodeGetPayload<{}>;
+  promoCode?: Prisma.PromoCodeGetPayload<object>;
 }> {
   const promoCode = await prisma.promoCode.findFirst({
     where: {
