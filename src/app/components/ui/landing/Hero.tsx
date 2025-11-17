@@ -52,7 +52,7 @@ const itemVariants = {
 const Hero = ({ activeSale }: HeroProps) => {
   const { isSearchActive } = useSearch();
 
-  // Dynamic content based on active sale
+  // Dynamic content based on active sale - always defined to prevent switching
   const heroContent: HeroContent = activeSale
     ? {
         title: "STOREWIDE SALE - ",
@@ -64,14 +64,12 @@ const Hero = ({ activeSale }: HeroProps) => {
         urgencyText: "While supplies last",
       }
     : {
-        title: "You name it, We've got it",
+        title: "You name it",
         subtitle: "Your No. 1 Shop Plug",
         buttonText: "Shop Now",
         buttonLink: "/shop",
         urgencyText: null,
       };
-
-  console.log("Hero content:", heroContent);
 
   return (
     <div className="relative w-full h-[100vh]">
@@ -83,85 +81,104 @@ const Hero = ({ activeSale }: HeroProps) => {
         objectFit="cover"
         className="absolute inset-0 z-0"
       />
+
       {/* White Overlay */}
       <div className="absolute inset-0 bg-white opacity-35 z-10"></div>
+
       {/* Content */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/50 to-white/100 z-10"></div>
+
       <div className="relative z-20 w-[90%] max-w-6xl mx-auto h-full px-4">
         <motion.div
-          variants={heroVariants}
-          initial="hidden"
-          animate="visible"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
           className="text-center absolute top-[40%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full"
         >
-          <motion.div variants={itemVariants}>
-            <div>
-              <p className={`text-lg md:text-xl font-medium text-center`}>
-                {heroContent.subtitle}
-              </p>
-            </div>
-          </motion.div>
-          <motion.div variants={itemVariants}>
-            <div>
-              <p
-                className={`text-2xl font-bold text-center mt-4 ${
-                  activeSale ? "md:text-5xl" : "md:text-4xl"
-                }`}
-              >
-                {activeSale ? (
-                  <>
-                    {heroContent.title}
-                    <span className="text-[#3474c0] font-bold">
-                      {heroContent.discountPercent}%
-                    </span>
-                    {heroContent.titleSuffix}
-                  </>
-                ) : (
-                  <>
-                    You name it{" "}
-                    <span className="block sm:inline">
-                      (
-                      <TypeAnimation
-                        sequence={[
-                          "Shelves_",
-                          1500,
-                          "Racks_",
-                          1500,
-                          "POS Receipt printers_",
-                          1500,
-                          "Peg Boards_",
-                          1500,
-                          "Price tag guns_",
-                          1500,
-                          "Baskets_",
-                          1500,
-                          "and more_",
-                          1500,
-                        ]}
-                        wrapper="span"
-                        speed={35}
-                        cursor={true}
-                        repeat={Infinity}
-                        className="text-[#3474c0] font-bold"
-                      />
-                      ),
-                    </span>{" "}
-                    We&apos;ve got it
-                  </>
-                )}
-              </p>
-            </div>
-          </motion.div>
+          {/* Subtitle */}
           <motion.div
-            variants={itemVariants}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+          >
+            <p className={`text-lg md:text-xl font-medium text-center`}>
+              {heroContent.subtitle}
+            </p>
+          </motion.div>
+
+          {/* Main Title */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+          >
+            <p
+              className={`text-2xl font-bold text-center mt-4 ${
+                activeSale ? "md:text-5xl" : "md:text-4xl"
+              }`}
+            >
+              {activeSale ? (
+                <>
+                  {heroContent.title}
+                  <span className="text-[#3474c0] font-bold">
+                    {heroContent.discountPercent}%
+                  </span>
+                  {heroContent.titleSuffix}
+                </>
+              ) : (
+                <>
+                  You name it{" "}
+                  <span className="block sm:inline">
+                    (
+                    <TypeAnimation
+                      key="type-animation"
+                      sequence={[
+                        "Shelves_",
+                        1500,
+                        "Racks_",
+                        1500,
+                        "POS Receipt printers_",
+                        1500,
+                        "Peg Boards_",
+                        1500,
+                        "Price tag guns_",
+                        1500,
+                        "Baskets_",
+                        1500,
+                        "and more_",
+                        1500,
+                      ]}
+                      wrapper="span"
+                      speed={35}
+                      cursor={true}
+                      repeat={Infinity}
+                      className="text-[#3474c0] font-bold"
+                    />
+                    ),
+                  </span>{" "}
+                  We&apos;ve got it
+                </>
+              )}
+            </p>
+          </motion.div>
+
+          {/* Search Bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6, ease: "easeOut" }}
             className="absolute top-full mt-6 left-1/2 transform -translate-x-1/2 w-full max-w-lg"
           >
             <div className="w-full">
               {!isSearchActive && <AnimatedSearchBar />}
             </div>
           </motion.div>
+
+          {/* CTA Button */}
           <motion.div
-            variants={itemVariants}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8, ease: "easeOut" }}
             className="absolute top-full mt-24 left-1/2 transform -translate-x-1/2"
           >
             <Link href={heroContent.buttonLink}>

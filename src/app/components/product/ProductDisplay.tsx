@@ -307,8 +307,8 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product }) => {
               </div>
 
               <div className="border-t border-b border-gray-200 py-6">
-                <div className="flex items-center justify-between">
-                  <span className="text-3xl font-bold text-[#3474c0]">
+                <div className="flex items-center">
+                  <span className="text-3xl font-bold text-[#3474c0] mr-4">
                     {product.originalPrice
                       ? product.originalPrice
                       : product.price}

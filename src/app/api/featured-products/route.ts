@@ -30,10 +30,19 @@ export async function GET() {
     // Transform the data to match the component's expected format
     const products = featuredProducts.map((featured) => {
       const product = featured.product;
+      const isOnSale = product.salePercent > 0;
+      const originalPrice = isOnSale
+        ? `GHS${product.price.toFixed(2)}`
+        : undefined;
+      const salePrice = isOnSale
+        ? `GHS${(product.price * (1 - product.salePercent / 100)).toFixed(2)}`
+        : `GHS${product.price.toFixed(2)}`;
+
       return {
         id: product.id,
         name: product.name,
-        price: `GHS${product.price.toFixed(2)}`,
+        price: salePrice,
+        originalPrice: originalPrice,
         image:
           product.images.length > 0
             ? product.images[0].url
@@ -44,6 +53,8 @@ export async function GET() {
         inStock: product.stock > 0,
         rating: 4.5, // Default rating since it's not in schema
         reviews: 0, // Default reviews count
+        isOnSale: isOnSale,
+        salePercent: isOnSale ? product.salePercent : undefined,
       };
     });
 

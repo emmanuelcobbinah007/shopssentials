@@ -131,24 +131,27 @@ export async function GET(request: NextRequest) {
             reviewCount
           : 0;
 
+      const isOnSale = product.salePercent > 0;
+      const originalPrice = isOnSale
+        ? `GHS${product.price.toFixed(2)}`
+        : undefined;
+      const currentPrice = isOnSale
+        ? `GHS${(product.price * (1 - product.salePercent / 100)).toFixed(2)}`
+        : `GHS${product.price.toFixed(2)}`;
+
       return {
         id: product.id,
         name: product.name,
-        price:
-          product.salePercent > 0
-            ? `₵${(
-                product.price -
-                (product.price * product.salePercent) / 100
-              ).toFixed(2)}`
-            : undefined,
-        originalPrice: `₵${product.price.toFixed(2)}`,
+        price: currentPrice,
+        originalPrice: originalPrice,
         image: product.images[0]?.url || "/images/placeholder.jpg",
         description: product.descriptionShort,
         category: product.category.name.toLowerCase().replace(/\s+/g, "-"),
         rating: averageRating,
         reviews: reviewCount,
         inStock: product.stock > 0,
-        isOnSale: product.salePercent > 0,
+        isOnSale: isOnSale,
+        salePercent: isOnSale ? product.salePercent : undefined,
         categoryId: product.categoryId,
         subCategoryId: product.subCategoryId,
       };

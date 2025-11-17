@@ -410,7 +410,7 @@ const BestSellers: React.FC = () => {
                               <div className="text-[#3474c0] font-bold text-xl">
                                 {product.price}
                               </div>
-                              <div className="text-gray-500 line-through text-lg">
+                              <div className="text-gray-500 line-through text-sm">
                                 {product.originalPrice}
                               </div>
                               <div className="bg-red-100 text-red-800 text-sm font-medium px-2.5 py-0.5 rounded">
@@ -472,7 +472,7 @@ const BestSellers: React.FC = () => {
                               <div className="text-[#3474c0] font-bold text-xl">
                                 {product.price}
                               </div>
-                              <div className="text-gray-500 line-through text-lg">
+                              <div className="text-gray-500 line-through text-sm">
                                 {product.originalPrice}
                               </div>
                               <div className="bg-red-100 text-red-800 text-sm font-medium px-2.5 py-0.5 rounded">

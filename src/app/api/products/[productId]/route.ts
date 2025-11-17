@@ -61,14 +61,12 @@ export async function GET(
     const transformedProduct = {
       id: product.id,
       name: product.name,
-      price: `₵${product.price.toFixed(2)}`,
-      originalPrice:
+      price:
         product.salePercent > 0
-          ? `₵${(
-              product.price -
-              (product.price * product.salePercent) / 100
-            ).toFixed(2)}`
-          : undefined,
+          ? `GHS${(product.price * (1 - product.salePercent / 100)).toFixed(2)}`
+          : `GHS${product.price.toFixed(2)}`,
+      originalPrice:
+        product.salePercent > 0 ? `GHS${product.price.toFixed(2)}` : undefined,
       image: product.images[0]?.url || "/images/placeholder.jpg",
       images: product.images.map((img) => img.url),
       description: product.descriptionLong || product.descriptionShort,
@@ -80,10 +78,10 @@ export async function GET(
       reviews: reviewCount,
       inStock: product.stock > 0,
       isOnSale: product.salePercent > 0,
+      salePercent: product.salePercent > 0 ? product.salePercent : undefined,
       categoryId: product.categoryId,
       subCategoryId: product.subCategoryId,
       stock: product.stock,
-      salePercent: product.salePercent,
       features: [
         `Stock: ${product.stock} units`,
         product.salePercent > 0

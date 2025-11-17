@@ -128,7 +128,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
 
   if (loading) {
     return (
-      <div className={`${className}`}>
+      <div className="max-w-5xl mx-auto">
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 rounded w-32 mb-4"></div>
           <div className="space-y-4">
@@ -153,7 +153,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
 
   if (error) {
     return (
-      <div className={`${className}`}>
+      <div className="max-w-5xl mx-auto">
         <div className="text-center py-8">
           <svg
             className="w-12 h-12 mx-auto text-gray-400 mb-4"
@@ -175,7 +175,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
   }
 
   return (
-    <div className={`${className}`}>
+    <div className="max-w-5xl mx-auto">
       {/* Reviews Header */}
       <div className="mb-6">
         <h3 className="text-xl font-semibold text-gray-800 mb-4">

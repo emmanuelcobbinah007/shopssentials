@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Hero from "./Hero";
 import FeaturedCategories from "./FeaturedCategories";
 import BestSellers from "./BestSellers";
@@ -9,12 +9,19 @@ import Newsletter from "./Newsletter";
 import { useStorewideSale } from "../../../hooks/useStorewideSale";
 
 const HomePageContent = () => {
-  // Fetch storewide sale data
-  const { data: saleData } = useStorewideSale();
+  const { data: saleData, isLoading } = useStorewideSale();
+  const [activeSale, setActiveSale] = useState<{
+    discountPercent: number;
+  } | null>(null);
 
-  const activeSale = saleData?.hasSale
-    ? { discountPercent: saleData.discountPercent }
-    : null;
+  // Prevent flash by setting sale data once it's loaded
+  useEffect(() => {
+    if (!isLoading && saleData) {
+      setActiveSale(
+        saleData.hasSale ? { discountPercent: saleData.discountPercent } : null
+      );
+    }
+  }, [saleData, isLoading]);
 
   return (
     <>
