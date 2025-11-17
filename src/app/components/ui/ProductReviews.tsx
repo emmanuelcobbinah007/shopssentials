@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Image from "next/image";
+import Link from "next/link";
 
 interface Review {
   id: string;
@@ -103,6 +104,17 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
 
   const getFullName = (user: { firstname: string; lastname: string }) => {
     return `${user.firstname} ${user.lastname}`.trim();
+  };
+
+  const getAnonymizedName = (user: { firstname: string; lastname: string }) => {
+    const fullName = getFullName(user);
+    const names = fullName.split(" ");
+    if (names.length >= 2) {
+      const firstName = names[0];
+      const lastName = names[names.length - 1];
+      return `${firstName} ${lastName.charAt(0)}***`;
+    }
+    return `${names[0]}***`;
   };
 
   const getInitials = (name: string) => {
@@ -210,7 +222,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
       {/* Reviews List */}
       {reviews.length > 0 && (
         <div className="space-y-4">
-          {reviews.map((review) => (
+          {reviews.slice(0, 3).map((review) => (
             <div
               key={review.id}
               className="border border-gray-200 rounded-lg p-4 bg-white"
@@ -239,7 +251,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="text-sm font-semibold text-gray-900">
-                      {getFullName(review.user)}
+                      {getAnonymizedName(review.user)}
                     </h4>
                     <span className="text-xs text-gray-500">
                       {formatDate(review.createdAt)}
@@ -257,6 +269,31 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({
               </div>
             </div>
           ))}
+
+          {/* Read More Link */}
+          {totalReviews > 3 && (
+            <div className="text-center pt-4">
+              <Link
+                href={`/product/${productId}/reviews`}
+                className="inline-flex items-center text-[#3474c0] hover:text-[#2a5a9a] font-medium transition-colors duration-200"
+              >
+                Read all {totalReviews} reviews
+                <svg
+                  className="w-4 h-4 ml-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -9,6 +9,7 @@ interface Product {
   id: string;
   name: string;
   price: string;
+  originalPrice?: string;
   image: string;
   description: string;
   categoryName?: string;
@@ -16,6 +17,8 @@ interface Product {
   inStock?: boolean;
   rating?: number;
   reviews?: number;
+  isOnSale?: boolean;
+  salePercent?: number;
 }
 
 const containerVariants = {
@@ -100,10 +103,35 @@ const BestSellers: React.FC = () => {
             </p>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {/* Loading skeleton */}
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="space-y-6">
-                <div className="bg-[#F9FAFB] rounded-2xl p-6 animate-pulse">
+            {/* Mobile Loading Skeleton */}
+            <div className="block lg:hidden overflow-x-auto pb-4">
+              <div className="flex gap-4 px-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="flex-shrink-0 w-80 bg-[#F9FAFB] rounded-2xl p-4 animate-pulse"
+                  >
+                    <div className="flex flex-col gap-4 items-center">
+                      <div className="w-32 h-32 bg-gray-200 rounded-xl"></div>
+                      <div className="flex-1 space-y-3 text-center">
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
+                        <div className="h-3 bg-gray-200 rounded w-full"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                        <div className="h-5 bg-gray-200 rounded w-1/3 mx-auto"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Desktop Loading Skeleton */}
+            <div className="hidden lg:block space-y-6">
+              {[1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="bg-[#F9FAFB] rounded-2xl p-6 animate-pulse"
+                >
                   <div className="flex flex-col sm:flex-row gap-6 items-center">
                     <div className="w-full sm:w-48 h-48 bg-gray-200 rounded-xl"></div>
                     <div className="flex-1 space-y-3">
@@ -114,8 +142,26 @@ const BestSellers: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <div className="hidden lg:block space-y-6 lg:mt-16">
+              {[3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="bg-[#F9FAFB] rounded-2xl p-6 animate-pulse"
+                >
+                  <div className="flex flex-col sm:flex-row gap-6 items-center">
+                    <div className="w-full sm:w-48 h-48 bg-gray-200 rounded-xl"></div>
+                    <div className="flex-1 space-y-3">
+                      <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-4 bg-gray-200 rounded w-full"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-6 bg-gray-200 rounded w-1/4"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -227,7 +273,7 @@ const BestSellers: React.FC = () => {
           className="text-center mb-16"
         >
           <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-[#1A1D23]">
-            Featured Products
+            People&apos;s Choice
           </h2>
           <p className="text-gray-500 max-w-xl mx-auto">
             Hand-picked featured products curated for quality and value —
@@ -240,88 +286,212 @@ const BestSellers: React.FC = () => {
           variants={containerVariants}
           initial="hidden"
           animate={controls}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto"
+          className="max-w-6xl mx-auto"
         >
-          {/* Left Column */}
-          <motion.div variants={leftColumnVariants} className="space-y-6">
-            {leftProducts.map((product: Product) => (
-              <Link
-                key={product.id}
-                href={`/product/${product.id}`}
-                className="group block"
-              >
-                <motion.div
-                  whileHover={{ scale: 1.02, y: -5 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-[#F9FAFB] rounded-2xl p-6 hover:shadow-xl hover:border hover:border-[#3474c0] transition-all duration-300 cursor-pointer"
+          {/* Mobile: Horizontal Scroll */}
+          <div className="block lg:hidden overflow-x-auto pb-4">
+            <div className="flex gap-4 px-4">
+              {products.map((product: Product) => (
+                <Link
+                  key={product.id}
+                  href={`/product/${product.id}`}
+                  className="flex-shrink-0 w-80 group block"
                 >
-                  <div className="flex flex-col sm:flex-row gap-6 items-center">
-                    <div className="w-full sm:w-48 h-48 relative rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        className="object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                    </div>
-                    <div className="flex-1 text-center sm:text-left">
-                      <h3 className="font-semibold text-lg text-[#1A1D23] mb-2 group-hover:text-[#3474c0] transition-colors">
-                        {product.name}
-                      </h3>
-                      <p className="text-gray-500 text-sm mb-4 leading-relaxed">
-                        {product.description}
-                      </p>
-                      <div className="text-[#3474c0] font-bold text-xl">
-                        {product.price}
+                  <motion.div
+                    whileHover={{ scale: 1.02, y: -5 }}
+                    transition={{ duration: 0.3 }}
+                    className="bg-[#F9FAFB] rounded-2xl p-4 hover:shadow-xl hover:border hover:border-[#3474c0] transition-all duration-300 cursor-pointer h-full relative"
+                  >
+                    {product.isOnSale && (
+                      <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10">
+                        SALE
+                      </div>
+                    )}
+                    <div className="flex flex-col gap-4 items-center">
+                      <div className="w-32 h-32 relative rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </div>
+                      <div className="flex-1 text-center">
+                        <h3 className="font-semibold text-sm text-[#1A1D23] mb-2 group-hover:text-[#3474c0] transition-colors line-clamp-2">
+                          {product.name}
+                        </h3>
+                        <p className="text-gray-500 text-xs mb-3 leading-relaxed line-clamp-2">
+                          {product.description}
+                        </p>
+                        <div className="flex flex-col items-center gap-1">
+                          {product.isOnSale && product.originalPrice ? (
+                            <>
+                              <div className="text-[#3474c0] font-bold text-lg">
+                                {product.price}
+                              </div>
+                              <div className="text-gray-500 line-through text-sm">
+                                {product.originalPrice}
+                              </div>
+                              <div className="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded">
+                                {product.salePercent}% OFF
+                              </div>
+                            </>
+                          ) : (
+                            <div className="text-[#3474c0] font-bold text-lg">
+                              {product.price}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </motion.div>
-              </Link>
-            ))}
-          </motion.div>
+                  </motion.div>
+                </Link>
+              ))}
+            </div>
+          </div>
 
-          {/* Right Column - Offset Down */}
-          <motion.div
-            variants={rightColumnVariants}
-            className="space-y-6 lg:mt-16"
-          >
-            {rightProducts.map((product: Product) => (
-              <Link
-                key={product.id}
-                href={`/product/${product.id}`}
-                className="group block"
-              >
-                <motion.div
-                  whileHover={{ scale: 1.02, y: -5 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-[#F9FAFB] rounded-2xl p-6 hover:shadow-xl hover:border hover:border-[#3474c0] transition-all duration-300 cursor-pointer"
+          {/* Mobile Scroll Indicator */}
+          <div className="block lg:hidden flex justify-center items-center gap-2 mt-4 mb-8">
+            <span className="text-gray-400 text-sm">Scroll for more</span>
+            <svg
+              className="w-4 h-4 text-gray-400 animate-bounce"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </div>
+
+          {/* Desktop: Grid Layout */}
+          <div className="hidden lg:grid lg:grid-cols-2 gap-8">
+            {/* Left Column */}
+            <motion.div variants={leftColumnVariants} className="space-y-6">
+              {leftProducts.map((product: Product) => (
+                <Link
+                  key={product.id}
+                  href={`/product/${product.id}`}
+                  className="group block"
                 >
-                  <div className="flex flex-col sm:flex-row gap-6 items-center">
-                    <div className="w-full sm:w-48 h-48 relative rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        className="object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                    </div>
-                    <div className="flex-1 text-center sm:text-left">
-                      <h3 className="font-semibold text-lg text-[#1A1D23] mb-2 group-hover:text-[#3474c0] transition-colors">
-                        {product.name}
-                      </h3>
-                      <p className="text-gray-500 text-sm mb-4 leading-relaxed">
-                        {product.description}
-                      </p>
-                      <div className="text-[#3474c0] font-bold text-xl">
-                        {product.price}
+                  <motion.div
+                    whileHover={{ scale: 1.02, y: -5 }}
+                    transition={{ duration: 0.3 }}
+                    className="bg-[#F9FAFB] rounded-2xl p-6 hover:shadow-xl hover:border hover:border-[#3474c0] transition-all duration-300 cursor-pointer relative"
+                  >
+                    {product.isOnSale && (
+                      <div className="absolute top-3 right-3 bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full z-10">
+                        SALE
+                      </div>
+                    )}
+                    <div className="flex flex-col sm:flex-row gap-6 items-center">
+                      <div className="w-full sm:w-48 h-48 relative rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </div>
+                      <div className="flex-1 text-center sm:text-left">
+                        <h3 className="font-semibold text-lg text-[#1A1D23] mb-2 group-hover:text-[#3474c0] transition-colors">
+                          {product.name}
+                        </h3>
+                        <p className="text-gray-500 text-sm mb-4 leading-relaxed">
+                          {product.description}
+                        </p>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                          {product.isOnSale && product.originalPrice ? (
+                            <>
+                              <div className="text-[#3474c0] font-bold text-xl">
+                                {product.price}
+                              </div>
+                              <div className="text-gray-500 line-through text-lg">
+                                {product.originalPrice}
+                              </div>
+                              <div className="bg-red-100 text-red-800 text-sm font-medium px-2.5 py-0.5 rounded">
+                                {product.salePercent}% OFF
+                              </div>
+                            </>
+                          ) : (
+                            <div className="text-[#3474c0] font-bold text-xl">
+                              {product.price}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </motion.div>
-              </Link>
-            ))}
-          </motion.div>
+                  </motion.div>
+                </Link>
+              ))}
+            </motion.div>{" "}
+            {/* Right Column - Offset Down */}
+            <motion.div
+              variants={rightColumnVariants}
+              className="space-y-6 lg:mt-16"
+            >
+              {rightProducts.map((product: Product) => (
+                <Link
+                  key={product.id}
+                  href={`/product/${product.id}`}
+                  className="group block"
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.02, y: -5 }}
+                    transition={{ duration: 0.3 }}
+                    className="bg-[#F9FAFB] rounded-2xl p-6 hover:shadow-xl hover:border hover:border-[#3474c0] transition-all duration-300 cursor-pointer relative"
+                  >
+                    {product.isOnSale && (
+                      <div className="absolute top-3 right-3 bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full z-10">
+                        SALE
+                      </div>
+                    )}
+                    <div className="flex flex-col sm:flex-row gap-6 items-center">
+                      <div className="w-full sm:w-48 h-48 relative rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </div>
+                      <div className="flex-1 text-center sm:text-left">
+                        <h3 className="font-semibold text-lg text-[#1A1D23] mb-2 group-hover:text-[#3474c0] transition-colors">
+                          {product.name}
+                        </h3>
+                        <p className="text-gray-500 text-sm mb-4 leading-relaxed">
+                          {product.description}
+                        </p>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                          {product.isOnSale && product.originalPrice ? (
+                            <>
+                              <div className="text-[#3474c0] font-bold text-xl">
+                                {product.price}
+                              </div>
+                              <div className="text-gray-500 line-through text-lg">
+                                {product.originalPrice}
+                              </div>
+                              <div className="bg-red-100 text-red-800 text-sm font-medium px-2.5 py-0.5 rounded">
+                                {product.salePercent}% OFF
+                              </div>
+                            </>
+                          ) : (
+                            <div className="text-[#3474c0] font-bold text-xl">
+                              {product.price}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </Link>
+              ))}
+            </motion.div>
+          </div>
         </motion.div>
       </div>
     </div>
